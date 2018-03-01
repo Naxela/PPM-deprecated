@@ -395,7 +395,7 @@ void main() {
 		//Gamma
 		fragColor.rgb = pow(fragColor.rgb, 1.0 / vec3(globalGammaR,globalGammaG,globalGammaB) );
 		//Gain + Offset
-		fragColor.rgb = fragColor.rgb * vec3( globalGainR,globalGainG,globalGainB ) + vec3(globalOffsetR-1,globalOffsetG-1,globalOffsetB-1)*0.4;
+		fragColor.rgb = fragColor.rgb * vec3( globalGainR,globalGainG,globalGainB ) + vec3(globalOffsetR-1,globalOffsetG-1,globalOffsetB-1);
 		//Tint
 		fragColor.rgb *= vec3(globalTintR,globalTintG,globalTintB);
 	//Shadow Values TODO
