@@ -1,0 +1,185 @@
+{
+	"contexts": [
+		{
+			"name": "compositor_pass",
+			"depth_write": false,
+			"color_write_alpha": false,
+			"compare_mode": "always",
+			"cull_mode": "none",
+			"links": [
+				{
+					"name": "eye",
+					"link": "_cameraPosition",
+					"ifdef": ["_CGlare"]
+				},
+				{
+					"name": "eye",
+					"link": "_cameraPosition",
+					"ifdef": ["_Disabled_CPos"]
+				},
+				{
+					"name": "eyeLook",
+					"link": "_cameraLook",
+					"ifdef": ["_CGlare"]
+				},
+				{
+					"name": "eyeLook",
+					"link": "_cameraLook",
+					"ifdef": ["_Disabled_CPos"]
+				},
+				{
+					"name": "invVP",
+					"link": "_inverseViewProjectionMatrix",
+					"ifdef": ["_Disabled_CPos"]
+				},
+				{
+					"name": "light",
+					"link": "_lampPosition",
+					"ifdef": ["_CGlare"]
+				},
+				{
+					"name": "VP",
+					"link": "_viewProjectionMatrix",
+					"ifdef": ["_CGlare"]
+				},
+				{
+					"name": "time",
+					"link": "_time",
+					"ifdef": ["_CGrain"]
+				},
+
+				
+				{
+					"name": "texStep",
+					"link": "_screenSizeInv",
+					"ifdef": ["_CFXAA", "_CDOF"]
+				},
+
+
+				{
+					"name": "dynamicScale",
+					"link": "_dynamicScale",
+					"ifdef": ["_DynRes"]
+				},
+				{
+					"name": "aspectRatio",
+					"link": "_aspectRatioF",
+					"ifdef": ["_CGlare"]
+				},
+				{
+					"name": "lensTexture",
+					"link": "_lensTexture",
+					"ifdef": ["_CLensTex"]
+				},
+				{
+					"name": "cameraProj",
+					"link": "_cameraPlaneProj",
+					"ifdef": ["_CFog", "_CDOF", "_CGlare"]
+				},
+				{
+					"name": "lutTexture",
+					"link": "_lutTexture",
+					"ifdef": ["_CLUT"]
+				},
+				{
+					"name": "globalWhiteBalance",
+					"link": "_globalWhiteBalance",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalTintR",
+					"link": "_globalTintR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalTintG",
+					"link": "_globalTintG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalTintB",
+					"link": "_globalTintB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalSaturationR",
+					"link": "_globalSaturationR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalSaturationG",
+					"link": "_globalSaturationG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalSaturationB",
+					"link": "_globalSaturationB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalContrastR",
+					"link": "_globalContrastR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalContrastG",
+					"link": "_globalContrastG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalContrastB",
+					"link": "_globalContrastB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGammaR",
+					"link": "_globalGammaR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGammaG",
+					"link": "_globalGammaG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGammaB",
+					"link": "_globalGammaB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGainR",
+					"link": "_globalGainR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGainG",
+					"link": "_globalGainG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalGainB",
+					"link": "_globalGainB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalOffsetR",
+					"link": "_globalOffsetR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalOffsetG",
+					"link": "_globalOffsetG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "globalOffsetB",
+					"link": "_globalOffsetB",
+					"ifdef": ["_PPV"]
+				}
+			],
+			"texture_params": [],
+			"vertex_shader": "compositor_pass.vert.glsl",
+			"fragment_shader": "compositor_pass.frag.glsl"
+		}
+	]
+}
