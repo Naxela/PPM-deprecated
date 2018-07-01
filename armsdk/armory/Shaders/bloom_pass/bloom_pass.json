@@ -1,0 +1,15 @@
+{
+	"contexts": [
+		{
+			"name": "bloom_pass",
+			"color_write_alpha": false,
+			"depth_write": false,
+			"compare_mode": "always",
+			"cull_mode": "none",
+			"links": [],
+			"texture_params": [],
+			"vertex_shader": "../include/pass.vert.glsl",
+			"fragment_shader": "bloom_pass.frag.glsl"
+		}
+	]
+}

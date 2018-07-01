@@ -46,16 +46,12 @@
 					"name": "time",
 					"link": "_time",
 					"ifdef": ["_CGrain"]
-				},
-
-				
+				},				
 				{
 					"name": "texStep",
 					"link": "_screenSizeInv",
-					"ifdef": ["_CFXAA", "_CDOF"]
+					"ifdef": ["_CTexStep"]
 				},
-
-
 				{
 					"name": "dynamicScale",
 					"link": "_dynamicScale",
@@ -174,6 +170,312 @@
 				{
 					"name": "globalOffsetB",
 					"link": "_globalOffsetB",
+					"ifdef": ["_PPV"]
+				},
+
+				{
+					"name": "shadowSaturationR",
+					"link": "_shadowSaturationR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowSaturationG",
+					"link": "_shadowSaturationG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowSaturationB",
+					"link": "_shadowSaturationB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowContrastR",
+					"link": "_shadowContrastR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowContrastG",
+					"link": "_shadowContrastG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowContrastB",
+					"link": "_shadowContrastB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGammaR",
+					"link": "_shadowGammaR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGammaG",
+					"link": "_shadowGammaG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGammaB",
+					"link": "_shadowGammaB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGainR",
+					"link": "_shadowGainR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGainG",
+					"link": "_shadowGainG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowGainB",
+					"link": "_shadowGainB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowOffsetR",
+					"link": "_shadowOffsetR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowOffsetG",
+					"link": "_shadowOffsetG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowOffsetB",
+					"link": "_shadowOffsetB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "shadowMax",
+					"link": "_shadowMax",
+					"ifdef": ["_PPV"]
+				},
+				
+				
+
+				{
+					"name": "midtonesSaturationR",
+					"link": "_midtonesSaturationR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesSaturationG",
+					"link": "_midtonesSaturationG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesSaturationB",
+					"link": "_midtonesSaturationB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesContrastR",
+					"link": "_midtonesContrastR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesContrastG",
+					"link": "_midtonesContrastG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesContrastB",
+					"link": "_midtonesContrastB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGammaR",
+					"link": "_midtonesGammaR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGammaG",
+					"link": "_midtonesGammaG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGammaB",
+					"link": "_midtonesGammaB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGainR",
+					"link": "_midtonesGainR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGainG",
+					"link": "_midtonesGainG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesGainB",
+					"link": "_midtonesGainB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesOffsetR",
+					"link": "_midtonesOffsetR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesOffsetG",
+					"link": "_midtonesOffsetG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "midtonesOffsetB",
+					"link": "_midtonesOffsetB",
+					"ifdef": ["_PPV"]
+				},
+
+
+				{
+					"name": "highlightsSaturationR",
+					"link": "_highlightsSaturationR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsSaturationG",
+					"link": "_highlightsSaturationG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsSaturationB",
+					"link": "_highlightsSaturationB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsContrastR",
+					"link": "_highlightsContrastR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsContrastG",
+					"link": "_highlightsContrastG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsContrastB",
+					"link": "_highlightsContrastB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGammaR",
+					"link": "_highlightsGammaR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGammaG",
+					"link": "_highlightsGammaG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGammaB",
+					"link": "_highlightsGammaB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGainR",
+					"link": "_highlightsGainR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGainG",
+					"link": "_highlightsGainG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsGainB",
+					"link": "_highlightsGainB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsOffsetR",
+					"link": "_highlightsOffsetR",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsOffsetG",
+					"link": "_highlightsOffsetG",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsOffsetB",
+					"link": "_highlightsOffsetB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "highlightsMin",
+					"link": "_highlightsMin",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "vignetteModifier",
+					"link": "_vignetteModifier",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "filmGrain",
+					"link": "_filmGrain",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "letterboxSize",
+					"link": "_letterbox",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "fogAmountA",
+					"link": "_fogAmountA",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "fogAmountB",
+					"link": "_fogAmountB",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "sharpen",
+					"link": "_sharpen",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofDistance",
+					"link": "_dofDistance",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofLength",
+					"link": "_dofLength",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofFStop",
+					"link": "_dofFStop",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofFocusX",
+					"link": "_dofFocusX",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofFocusY",
+					"link": "_dofFocusY",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofSamples",
+					"link": "_dofSamples",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "dofRings",
+					"link": "_dofRings",
 					"ifdef": ["_PPV"]
 				}
 			],

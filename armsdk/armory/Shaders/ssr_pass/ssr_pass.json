@@ -1,0 +1,57 @@
+{
+	"contexts": [
+		{
+			"name": "ssr_pass",
+			"depth_write": false,
+			"color_write_alpha": false,
+			"compare_mode": "always",
+			"cull_mode": "none",
+			"links": [
+				{
+					"name": "P",
+					"link": "_projectionMatrix"
+				},
+				{
+					"name": "tiV",
+					"link": "_transposeInverseViewMatrix"
+				},
+				{
+					"name": "invP",
+					"link": "_inverseProjectionMatrix"
+				},
+				{
+					"name": "cameraProj",
+					"link": "_cameraPlaneProj"
+				},
+				{
+					"name": "ssrStepModifier",
+					"link": "_ssrStepModifier",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "ssrStepMinModifier",
+					"link": "_ssrStepMinModifier",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "ssrSearchModifier",
+					"link": "_ssrSearchModifier",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "ssrFalloffModifier",
+					"link": "_ssrFalloffModifier",
+					"ifdef": ["_PPV"]
+				},
+				{
+					"name": "ssrJitterModifier",
+					"link": "_ssrJitterModifier",
+					"ifdef": ["_PPV"]
+				}
+			],
+			"texture_params": [],
+			"vertex_shader": "../include/pass_viewray2.vert.glsl",
+			"fragment_shader": "ssr_pass.frag.glsl"
+		}
+	]
+}
