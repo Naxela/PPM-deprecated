@@ -5,6 +5,8 @@ import arm.log as log
 import arm.make_state as state
 import arm.api
 
+callback = None
+
 def add_world_defs():
     wrd = bpy.data.worlds['Arm']
     rpdat = arm.utils.get_rp()
@@ -13,7 +15,7 @@ def add_world_defs():
     if rpdat.arm_ssrs:
         wrd.world_defs += '_SSRS'
 
-    if wrd.arm_two_sided_area_lamp:
+    if rpdat.arm_two_sided_area_lamp:
         wrd.world_defs += '_TwoSidedAreaLamp'
 
     # Store contexts
@@ -38,6 +40,8 @@ def add_world_defs():
 
     if rpdat.rp_renderer == 'Deferred':
         assets.add_khafile_def('arm_deferred')
+        wrd.world_defs += '_Deferred'
+
     # GI
     voxelgi = False
     voxelao = False
@@ -70,14 +74,14 @@ def add_world_defs():
     if rpdat.rp_ssgi == 'RTGI' or rpdat.rp_ssgi == 'RTAO':
         if rpdat.rp_ssgi == 'RTGI':
             wrd.world_defs += '_RTGI'
-        if wrd.arm_ssgi_rays == '9':
+        if rpdat.arm_ssgi_rays == '9':
             wrd.world_defs += '_SSGICone9'
     if rpdat.rp_autoexposure:
         wrd.world_defs += '_AutoExposure'
 
     if voxelgi or voxelao:
         assets.add_khafile_def('arm_voxelgi')
-        wrd.world_defs += '_VoxelCones' + wrd.arm_voxelgi_cones
+        wrd.world_defs += '_VoxelCones' + rpdat.arm_voxelgi_cones
         if rpdat.arm_voxelgi_revoxelize:
             assets.add_khafile_def('arm_voxelgi_revox')
             if rpdat.arm_voxelgi_camera:
@@ -88,14 +92,18 @@ def add_world_defs():
 
         if voxelgi:
             wrd.world_defs += '_VoxelGI'
+            assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_light/voxel_light.comp.glsl')
+            if rpdat.arm_voxelgi_bounces != "1":
+                assets.add_khafile_def('rp_gi_bounces={0}'.format(rpdat.arm_voxelgi_bounces))
+                assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_bounce/voxel_bounce.comp.glsl')
             if rpdat.arm_voxelgi_shadows:
                 wrd.world_defs += '_VoxelGIDirect'
                 wrd.world_defs += '_VoxelGIShadow'
             if rpdat.arm_voxelgi_refraction:
                 wrd.world_defs += '_VoxelGIDirect'
                 wrd.world_defs += '_VoxelGIRefract'
-            if rpdat.arm_voxelgi_emission:
-                wrd.world_defs += '_VoxelGIEmission'
+            if rpdat.rp_voxelgi_relight:
+                assets.add_khafile_def('rp_voxelgi_relight')
         elif voxelao:
             wrd.world_defs += '_VoxelAO'
 
@@ -155,17 +163,19 @@ def build():
         if rpdat.rp_compositornodes:
             assets.add_khafile_def('rp_compositornodes')
             compo_depth = False
-            if wrd.arm_tonemap != 'Off':
-                wrd.compo_defs = '_CTone' + wrd.arm_tonemap
+            if rpdat.arm_tonemap != 'Off':
+                wrd.compo_defs = '_CTone' + rpdat.arm_tonemap
             if rpdat.rp_antialiasing == 'FXAA':
                 wrd.compo_defs += '_CFXAA'
-            if wrd.arm_letterbox:
+            if rpdat.arm_letterbox:
                 wrd.compo_defs += '_CLetterbox'
-            if wrd.arm_grain:
+            if rpdat.arm_grain:
                 wrd.compo_defs += '_CGrain'
+            if rpdat.arm_sharpen:
+                wrd.compo_defs += '_CSharpen'
             if bpy.data.scenes[0].cycles.film_exposure != 1.0:
                 wrd.compo_defs += '_CExposure'
-            if wrd.arm_fog:
+            if rpdat.arm_fog:
                 wrd.compo_defs += '_CFog'
                 compo_depth = True
             if len(bpy.data.cameras) > 0 and bpy.data.cameras[0].dof_distance > 0.0:
@@ -174,19 +184,20 @@ def build():
             if compo_depth:
                 wrd.compo_defs += '_CDepth'
                 assets.add_khafile_def('rp_compositordepth')
-            if wrd.arm_lens_texture != '':
+            if rpdat.arm_lens_texture != '':
                 wrd.compo_defs += '_CLensTex'
                 assets.add_embedded_data('lenstexture.jpg')
-            if wrd.arm_fisheye:
+            if rpdat.arm_fisheye:
                 wrd.compo_defs += '_CFishEye'
-            if wrd.arm_vignette:
+            if rpdat.arm_vignette:
                 wrd.compo_defs += '_CVignette'
-            if wrd.arm_lensflare:
+            if rpdat.arm_lensflare:
                 wrd.compo_defs += '_CGlare'
-            if wrd.arm_lut_texture != '':
+            if rpdat.arm_lut_texture != '':
                 wrd.compo_defs += '_CLUT'
                 assets.add_embedded_data('luttexture.jpg')
-            wrd.compo_defs += '_PPV'
+            if '_CDOF' in wrd.compo_defs or '_CFXAA' in wrd.compo_defs or '_CSharpen' in wrd.compo_defs:
+                wrd.compo_defs += '_CTexStep'
             assets.add_shader_pass('compositor_pass')
         else:
             assets.add_shader_pass('copy_pass')
@@ -249,8 +260,8 @@ def build():
         else:
             log.warn('Disabling Voxel GI - unsupported target - use Krom instead')
 
-    if rpdat.arm_rp_resolution != 'Display':
-        assets.add_khafile_def('rp_resolution={0}'.format(rpdat.arm_rp_resolution))
+    if rpdat.arm_rp_resolution == 'Custom':
+        assets.add_khafile_def('rp_resolution_filter={0}'.format(rpdat.arm_rp_resolution_filter))
 
     assets.add_khafile_def('rp_ssgi={0}'.format(rpdat.rp_ssgi))
     if rpdat.rp_ssgi != 'Off':
@@ -268,11 +279,6 @@ def build():
         assets.add_shader_pass('deferred_indirect')
         assets.add_shader_pass('deferred_light')
         assets.add_shader_pass('deferred_light_quad')
-
-    if rpdat.rp_rendercapture:
-        assets.add_khafile_def('rp_rendercapture')
-        assets.add_khafile_def('rp_rendercapture_format={0}'.format(wrd.rp_rendercapture_format))
-        assets.add_shader_pass('copy_pass')
         
     if rpdat.rp_volumetriclight:
         assets.add_khafile_def('rp_volumetriclight')
@@ -309,6 +315,8 @@ def build():
         assets.add_shader_pass('blur_adaptive_pass')
         if rpdat.arm_ssr_half_res:
             assets.add_khafile_def('rp_ssr_half')
+        if rpdat.rp_ssr_z_only:
+            wrd.world_defs += '_SSRZOnly'
 
     if rpdat.rp_motionblur != 'Off':
         assets.add_khafile_def('rp_motionblur={0}'.format(rpdat.rp_motionblur))
@@ -335,3 +343,23 @@ def build():
                 wrd.world_defs += '_PenumbraScale'
         else:
             log.warn('Disabling soft shadows - "Armory Render Path - Cascades" requires to be set to 1 for now')
+
+    if rpdat.rp_ppv_state != 'Off':
+        wrd.compo_defs += "_PPV"
+        wrd.world_defs += '_PPV'
+        assets.add_khafile_def('rp_ppv')
+        #assets.add_khafile_def('rp_chromatic_aberration')
+        #assets.add_shader_pass('copy_pass')
+        #assets.add_shader_pass('chromatic_aberration_pass') #Todo: Make it separate as more shaders is introduced
+
+    gbuffer2_direct = '_SSS' in wrd.world_defs or '_Hair' in wrd.world_defs or rpdat.arm_voxelgi_refraction
+    gbuffer2 = '_Veloc' in wrd.world_defs or gbuffer2_direct
+    if gbuffer2:
+        assets.add_khafile_def('rp_gbuffer2')
+        wrd.world_defs += '_gbuffer2'
+        if gbuffer2_direct:
+            assets.add_khafile_def('rp_gbuffer2_direct')
+            wrd.world_defs += '_gbuffer2direct'
+
+    if callback != None:
+        callback()
