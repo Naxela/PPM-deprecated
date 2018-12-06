@@ -1,7 +1,7 @@
 # PPV_Volumes
 PPV Volume is an addon for Armory3D that implements volumes that controls or triggers changes
 of the values provided to the shaders in Armory.
-This allows for interactive color grading
+This allows for interactive color grading and realtime stuff
 For now, there's only one global volume that can be changed. This will be changed in the version 0.2.
 
 ## Why as an addon?
@@ -20,7 +20,7 @@ Simply copy and paste the **armsdk** folder directly into your Armory/Blender ma
 If you run your project now, you should now have a sidebar that will allow you to modify the various postprocess values.
 
 ## To do:
-- Add controls and make transitions working
-- Implement controls for Bloom, Vignette, Film Grain and more.
-- Add load/save functions for preset files Blender and Krom
-- Pictures to explain the how to.
+- Make a proper description
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- I'll update it properly to Armory 0.6 once it arrives. In the meantime, feel free to see if you can get it working, and feel free to look through the shaders.

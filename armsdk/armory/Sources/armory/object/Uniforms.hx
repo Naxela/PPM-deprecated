@@ -10,6 +10,7 @@ class Uniforms {
 
 	public static function register() {
 		iron.object.Uniforms.externalTextureLinks = [textureLink];
+		iron.object.Uniforms.externalVec2Links = [vec2Link];
 		iron.object.Uniforms.externalVec3Links = [vec3Link];
 		iron.object.Uniforms.externalFloatLinks = [floatLink];
 	}
@@ -48,7 +49,7 @@ class Uniforms {
 		#if arm_hosek
 		if (link == "_hosekA") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -59,7 +60,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekB") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -70,7 +71,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekC") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -81,7 +82,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekD") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -92,7 +93,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekE") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -103,7 +104,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekF") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -114,7 +115,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekG") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -125,7 +126,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekH") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -136,7 +137,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekI") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -147,7 +148,7 @@ class Uniforms {
 		}
 		else if (link == "_hosekZ") {
 			if (armory.renderpath.HosekWilkie.data == null) {
-				armory.renderpath.HosekWilkie.init(Scene.active.world);
+				armory.renderpath.HosekWilkie.recompute(Scene.active.world);
 			}
 			if (armory.renderpath.HosekWilkie.data != null) {
 				v = iron.object.Uniforms.helpVec;
@@ -156,8 +157,9 @@ class Uniforms {
 				v.z = armory.renderpath.HosekWilkie.data.Z.z;
 			}
 		}
-		else if (link == "_cameraPositionSnap") {
-			#if arm_voxelgi
+		#end
+		#if arm_voxelgi
+		if (link == "_cameraPositionSnap") {
 			v = iron.object.Uniforms.helpVec;
 			var camera = iron.Scene.active.camera;
 			v.set(camera.transform.worldx(), camera.transform.worldy(), camera.transform.worldz());
@@ -167,9 +169,200 @@ class Uniforms {
 			v.y += l.y * e * 0.9;
 			var f = Main.voxelgiVoxelSize * 8; // Snaps to 3 mip-maps range
 			v.set(Math.floor(v.x / f) * f, Math.floor(v.y / f) * f, Math.floor(v.z / f) * f);
-			#end
 		}
 		#end
+
+		//#if rp_ppv
+		//Global PPV
+		if (link == "_globalWeight") {
+			var ppv_index = 0;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalTint") {
+			var ppv_index = 1;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalSaturation") {
+			var ppv_index = 2;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalContrast") {
+			var ppv_index = 3;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalGamma") {
+			var ppv_index = 4;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalGain") {
+			var ppv_index = 5;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalOffset") {
+			var ppv_index = 6;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+		if (link == "_globalExposure") {
+			var ppv_index = 7;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_global_uniforms[ppv_index][2];
+		}
+
+		//Shadow PPV
+		if (link == "_shadowSaturation") {
+			var ppv_index = 0;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][2];
+		}
+		if (link == "_shadowContrast") {
+			var ppv_index = 1;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][2];
+		}
+		if (link == "_shadowGamma") {
+			var ppv_index = 2;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][2];
+		}
+		if (link == "_shadowGain") {
+			var ppv_index = 3;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][2];
+		}
+		if (link == "_shadowOffset") {
+			var ppv_index = 4;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_shadow_uniforms[ppv_index][2];
+		}
+
+		//Midtone PPV
+		if (link == "_midtoneSaturation") {
+			var ppv_index = 0;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][2];
+		}
+		if (link == "_midtoneContrast") {
+			var ppv_index = 1;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][2];
+		}
+		if (link == "_midtoneGamma") {
+			var ppv_index = 2;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][2];
+		}
+		if (link == "_midtoneGain") {
+			var ppv_index = 3;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][2];
+		}
+		if (link == "_midtoneOffset") {
+			var ppv_index = 4;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_midtone_uniforms[ppv_index][2];
+		}
+
+		//Highlight PPV
+		if (link == "_highlightSaturation") {
+			var ppv_index = 0;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][2];
+		}
+		if (link == "_highlightContrast") {
+			var ppv_index = 1;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][2];
+		}
+		if (link == "_highlightGamma") {
+			var ppv_index = 2;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][2];
+		}
+		if (link == "_highlightGain") {
+			var ppv_index = 3;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][2];
+		}
+		if (link == "_highlightOffset") {
+			var ppv_index = 4;
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][0];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][1];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_highlight_uniforms[ppv_index][2];
+		}
+		//#end
+
+		//Post-Process Effects
+		if (link == "_bloomTintPPV") {
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[5];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[6];
+			v.z = armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[7];
+		}
+
+		return v;
+	}
+
+	public static function vec2Link(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
+		var v:Vec4 = null;
+
+		if (link == "_bloomAnamorphyPPV"){
+			v = iron.object.Uniforms.helpVec;
+			v.x = armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[3];
+			v.y = armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[4];
+		}
+
 		return v;
 	}
 
@@ -180,303 +373,124 @@ class Uniforms {
 		}
 		#end
 
-		// To do: Set compiler if
-		if (link == "_globalWhiteBalance") {
-			return armory.renderpath.PostProcessUniforms.global_whitebalance;
+		if (link == "_bloomStrengthPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[0];
 		}
-		if (link == "_globalTintR") {
-			return armory.renderpath.PostProcessUniforms.global_tint_r;
+		if (link == "_bloomRadiusPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[1];
 		}
-		if (link == "_globalTintG") {
-			return armory.renderpath.PostProcessUniforms.global_tint_g;
-		}
-		if (link == "_globalTintB") {
-			return armory.renderpath.PostProcessUniforms.global_tint_b;
-		}
-		if (link == "_globalSaturationR") {
-			return armory.renderpath.PostProcessUniforms.global_saturation_r;
-		}
-		if (link == "_globalSaturationG") {
-			return armory.renderpath.PostProcessUniforms.global_saturation_g;
-		}
-		if (link == "_globalSaturationB") {
-			return armory.renderpath.PostProcessUniforms.global_saturation_b;
-		}
-		if (link == "_globalContrastR") {
-			return armory.renderpath.PostProcessUniforms.global_contrast_r;
-		}
-		if (link == "_globalContrastG") {
-			return armory.renderpath.PostProcessUniforms.global_contrast_b;
-		}
-		if (link == "_globalContrastB") {
-			return armory.renderpath.PostProcessUniforms.global_contrast_g;
-		}
-		if (link == "_globalGammaR") {
-			return armory.renderpath.PostProcessUniforms.global_gamma_r;
-		}
-		if (link == "_globalGammaG") {
-			return armory.renderpath.PostProcessUniforms.global_gamma_g;
-		}
-		if (link == "_globalGammaB") {
-			return armory.renderpath.PostProcessUniforms.global_gamma_b;
-		}
-		if (link == "_globalGainR") {
-			return armory.renderpath.PostProcessUniforms.global_gain_r;
-		}
-		if (link == "_globalGainG") {
-			return armory.renderpath.PostProcessUniforms.global_gain_g;
-		}
-		if (link == "_globalGainB") {
-			return armory.renderpath.PostProcessUniforms.global_gain_b;
-		}
-		if (link == "_globalOffsetR") {
-			return armory.renderpath.PostProcessUniforms.global_offset_r;
-		}
-		if (link == "_globalOffsetG") {
-			return armory.renderpath.PostProcessUniforms.global_offset_g;
-		}
-		if (link == "_globalOffsetB") {
-			return armory.renderpath.PostProcessUniforms.global_offset_b;
+		if (link == "_bloomThresholdPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[2];
 		}
 
-
-
-		if (link == "_shadowSaturationR") {
-			return armory.renderpath.PostProcessUniforms.shadow_saturation_r;
+		if (link == "_lutPowerPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[8];
 		}
-		if (link == "_shadowSaturationG") {
-			return armory.renderpath.PostProcessUniforms.shadow_saturation_g;
+		if (link == "_ssrStepPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[9];
 		}
-		if (link == "_shadowSaturationB") {
-			return armory.renderpath.PostProcessUniforms.shadow_saturation_b;
+		if (link == "_ssrStepMinPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[10];
 		}
-		if (link == "_shadowContrastR") {
-			return armory.renderpath.PostProcessUniforms.shadow_contrast_r;
+		if (link == "_ssrSearchPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[11];
 		}
-		if (link == "_shadowContrastG") {
-			return armory.renderpath.PostProcessUniforms.shadow_contrast_b;
+		if (link == "_ssrFalloffPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[12];
 		}
-		if (link == "_shadowContrastB") {
-			return armory.renderpath.PostProcessUniforms.shadow_contrast_g;
+		if (link == "_ssrJitterPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[13];
 		}
-		if (link == "_shadowGammaR") {
-			return armory.renderpath.PostProcessUniforms.shadow_gamma_r;
+		if (link == "_filmGrainPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[14];
 		}
-		if (link == "_shadowGammaG") {
-			return armory.renderpath.PostProcessUniforms.shadow_gamma_g;
+		if (link == "_ssrsStepPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[15];
 		}
-		if (link == "_shadowGammaB") {
-			return armory.renderpath.PostProcessUniforms.shadow_gamma_b;
+		if (link == "_letterboxRatioPPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[16];
 		}
-		if (link == "_shadowGainR") {
-			return armory.renderpath.PostProcessUniforms.shadow_gain_r;
+		if (link == "_penumbraScalePPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[17];
 		}
-		if (link == "_shadowGainG") {
-			return armory.renderpath.PostProcessUniforms.shadow_gain_g;
+		if (link == "_penumbraDistancePPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[18];
 		}
-		if (link == "_shadowGainB") {
-			return armory.renderpath.PostProcessUniforms.shadow_gain_b;
+		if (link == "_sharpenPower") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[19];
 		}
-		if (link == "_shadowOffsetR") {
-			return armory.renderpath.PostProcessUniforms.shadow_offset_r;
+		if (link == "_VignettePower") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[20];
 		}
-		if (link == "_shadowOffsetG") {
-			return armory.renderpath.PostProcessUniforms.shadow_offset_g;
+		if(link == "_vxgiDiff") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[21];
 		}
-		if (link == "_shadowOffsetB") {
-			return armory.renderpath.PostProcessUniforms.shadow_offset_b;
+		if(link == "_vxgiSpec") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[22];
 		}
-		if (link == "_shadowMax") {
-			return armory.renderpath.PostProcessUniforms.shadow_max;
+		if(link == "_vxgiOcc") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[23];
 		}
-
-
-		if (link == "_midtonesSaturationR") {
-			return armory.renderpath.PostProcessUniforms.midtones_saturation_r;
+		if(link == "_vxgiEnv") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[24];
 		}
-		if (link == "_midtonesSaturationG") {
-			return armory.renderpath.PostProcessUniforms.midtones_saturation_g;
+		if(link == "_vxgiStep") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[25];
 		}
-		if (link == "_midtonesSaturationB") {
-			return armory.renderpath.PostProcessUniforms.midtones_saturation_b;
+		if(link == "_vxgiRange") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[26];
 		}
-		if (link == "_midtonesContrastR") {
-			return armory.renderpath.PostProcessUniforms.midtones_contrast_r;
-		}
-		if (link == "_midtonesContrastG") {
-			return armory.renderpath.PostProcessUniforms.midtones_contrast_b;
-		}
-		if (link == "_midtonesContrastB") {
-			return armory.renderpath.PostProcessUniforms.midtones_contrast_g;
-		}
-		if (link == "_midtonesGammaR") {
-			return armory.renderpath.PostProcessUniforms.midtones_gamma_r;
-		}
-		if (link == "_midtonesGammaG") {
-			return armory.renderpath.PostProcessUniforms.midtones_gamma_g;
-		}
-		if (link == "_midtonesGammaB") {
-			return armory.renderpath.PostProcessUniforms.midtones_gamma_b;
-		}
-		if (link == "_midtonesGainR") {
-			return armory.renderpath.PostProcessUniforms.midtones_gain_r;
-		}
-		if (link == "_midtonesGainG") {
-			return armory.renderpath.PostProcessUniforms.midtones_gain_g;
-		}
-		if (link == "_midtonesGainB") {
-			return armory.renderpath.PostProcessUniforms.midtones_gain_b;
-		}
-		if (link == "_midtonesOffsetR") {
-			return armory.renderpath.PostProcessUniforms.midtones_offset_r;
-		}
-		if (link == "_midtonesOffsetG") {
-			return armory.renderpath.PostProcessUniforms.midtones_offset_g;
-		}
-		if (link == "_midtonesOffsetB") {
-			return armory.renderpath.PostProcessUniforms.midtones_offset_b;
+		if(link == "_vxgiOffset") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[27];
 		}
 
-
-		if (link == "_highlightsSaturationR") {
-			return armory.renderpath.PostProcessUniforms.highlights_saturation_r;
+		if(link == "_dofDistance") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[28];
 		}
-		if (link == "_highlightsSaturationG") {
-			return armory.renderpath.PostProcessUniforms.highlights_saturation_g;
+		if(link == "_dofFStop") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[29];
 		}
-		if (link == "_highlightsSaturationB") {
-			return armory.renderpath.PostProcessUniforms.highlights_saturation_b;
+		if(link == "_dofLength") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[30];
 		}
-		if (link == "_highlightsContrastR") {
-			return armory.renderpath.PostProcessUniforms.highlights_contrast_r;
+		if(link == "_dofFocusX") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[31];
 		}
-		if (link == "_highlightsContrastG") {
-			return armory.renderpath.PostProcessUniforms.highlights_contrast_b;
+		if(link == "_dofFocusY") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[32];
 		}
-		if (link == "_highlightsContrastB") {
-			return armory.renderpath.PostProcessUniforms.highlights_contrast_g;
+		if(link == "_dofCOC") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[33];
 		}
-		if (link == "_highlightsGammaR") {
-			return armory.renderpath.PostProcessUniforms.highlights_gamma_r;
+		if(link == "_dofMaxBlur") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[34];
 		}
-		if (link == "_highlightsGammaG") {
-			return armory.renderpath.PostProcessUniforms.highlights_gamma_g;
+		if(link == "_dofThreshold") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[35];
 		}
-		if (link == "_highlightsGammaB") {
-			return armory.renderpath.PostProcessUniforms.highlights_gamma_b;
+		if(link == "_dofHighlightGain") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[36];
 		}
-		if (link == "_highlightsGainR") {
-			return armory.renderpath.PostProcessUniforms.highlights_gain_r;
+		if(link == "_dofBias") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[37];
 		}
-		if (link == "_highlightsGainG") {
-			return armory.renderpath.PostProcessUniforms.highlights_gain_g;
+		if(link == "_dofFringe") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[38];
 		}
-		if (link == "_highlightsGainB") {
-			return armory.renderpath.PostProcessUniforms.highlights_gain_b;
+		if(link == "_dofDither") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[39];
 		}
-		if (link == "_highlightsOffsetR") {
-			return armory.renderpath.PostProcessUniforms.highlights_offset_r;
+		if(link == "_rtgiStep") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[40];
 		}
-		if (link == "_highlightsOffsetG") {
-			return armory.renderpath.PostProcessUniforms.highlights_offset_g;
+		if(link == "_rtgiStrength") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[41];
 		}
-		if (link == "_highlightsOffsetB") {
-			return armory.renderpath.PostProcessUniforms.highlights_offset_b;
+		if(link == "_rtgiMaxSteps") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[42];
 		}
-		if (link == "_highlightsMin") {
-			return armory.renderpath.PostProcessUniforms.highlights_min;
-		}
-		
-		if (link == '_vignetteModifier') {
-			return armory.renderpath.PostProcessUniforms.vignette_modifier;
-		}
-		if (link == '_filmGrain') {
-			return armory.renderpath.PostProcessUniforms.film_grain;
-		}
-		if (link == '_bloomStrengthModifier') {
-			return armory.renderpath.PostProcessUniforms.bloom_strength_modifier;
-		}
-		if (link == '_bloomRadiusModifier') {
-			return armory.renderpath.PostProcessUniforms.bloom_radius_modifier;
-		}
-		if (link == '_bloomThresholdModifier') {
-			return armory.renderpath.PostProcessUniforms.bloom_threshold_modifier;
-		}
-		if (link == '_ssrStepModifier') {
-			return armory.renderpath.PostProcessUniforms.ssr_step;
-		}
-		if (link == '_ssrStepMinModifier') {
-			return armory.renderpath.PostProcessUniforms.ssr_step_min;
-		}
-		if (link == '_ssrSearchModifier') {
-			return armory.renderpath.PostProcessUniforms.ssr_search;
-		}
-		if (link == '_ssrFalloffModifier') {
-			return armory.renderpath.PostProcessUniforms.ssr_falloff;
-		}
-		if (link == '_ssrJitterModifier') {
-			return armory.renderpath.PostProcessUniforms.ssr_jitter;
-		}
-		if (link == '_letterbox') {
-			return armory.renderpath.PostProcessUniforms.letterbox;
-		}
-		if (link == '_fogAmountA') {
-			return armory.renderpath.PostProcessUniforms.fog_amount_a;
-		}
-		if (link == '_fogAmountB') {
-			return armory.renderpath.PostProcessUniforms.fog_amount_b;
-		}
-		if (link == '_sharpen') {
-			return armory.renderpath.PostProcessUniforms.sharpen;
-		}
-		if (link == '_dofDistance') {
-			return armory.renderpath.PostProcessUniforms.dof_distance;
-		}
-		if (link == '_dofLength') {
-			return armory.renderpath.PostProcessUniforms.dof_length;
-		}
-		if (link == '_dofFStop') {
-			return armory.renderpath.PostProcessUniforms.dof_fstop;
-		}
-
-		//N
-		if (link == '_dofSamples') {
-			return armory.renderpath.PostProcessUniforms.dof_samples;
-		}
-		if (link == '_dofRings') {
-			return armory.renderpath.PostProcessUniforms.dof_rings;
-		}
-		if (link == '_dofMaxBlur') {
-			return armory.renderpath.PostProcessUniforms.dof_max_blur;
-		}
-		if (link == '_dofGain') {
-			return armory.renderpath.PostProcessUniforms.dof_gain;
-		}
-		if (link == '_dofBokehBias') {
-			return armory.renderpath.PostProcessUniforms.dof_bokeh_bias;
-		}
-		if (link == '_dofFringe') {
-			return armory.renderpath.PostProcessUniforms.dof_fringe;
-		}
-		if (link == '_dofDither') {
-			return armory.renderpath.PostProcessUniforms.dof_dither;
-		}
-		if (link == '_dofFocusX') {
-			return armory.renderpath.PostProcessUniforms.dof_focus_x;
-		}
-		if (link == '_dofFocusY') {
-			return armory.renderpath.PostProcessUniforms.dof_focus_y;
-		}
-
-		//N
-		if (link == '_ssgiMaxSteps') {
-			return armory.renderpath.PostProcessUniforms.ssgi_max_steps;
-		}
-		if (link == '_ssgiRayStep') {
-			return armory.renderpath.PostProcessUniforms.ssgi_ray_step;
-		}
-		if (link == '_ssgiStrength') {
-			return armory.renderpath.PostProcessUniforms.ssgi_strength;
+		if(link == "_fringePPV") {
+			return armory.renderpath.PostProcessUniforms.ppv_postprocess_uniforms[43];
 		}
 
 		return null;

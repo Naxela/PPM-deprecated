@@ -15,8 +15,8 @@ def add_world_defs():
     if rpdat.arm_ssrs:
         wrd.world_defs += '_SSRS'
 
-    if rpdat.arm_two_sided_area_lamp:
-        wrd.world_defs += '_TwoSidedAreaLamp'
+    if rpdat.arm_two_sided_area_light:
+        wrd.world_defs += '_TwoSidedAreaLight'
 
     # Store contexts
     if rpdat.rp_hdr == False:
@@ -26,16 +26,16 @@ def add_world_defs():
     if rpdat.arm_diffuse_model == 'OrenNayar':
         wrd.world_defs += '_OrenNayar'
 
-    # TODO: Lamp texture test..
-    if wrd.arm_lamp_texture != '':
-        wrd.world_defs += '_LampColTex'
+    # TODO: Light texture test..
+    if wrd.arm_light_texture != '':
+        wrd.world_defs += '_LightColTex'
 
-    if wrd.arm_lamp_ies_texture != '':
-        wrd.world_defs += '_LampIES'
+    if wrd.arm_light_ies_texture != '':
+        wrd.world_defs += '_LightIES'
         assets.add_embedded_data('iestexture.png')
 
-    if wrd.arm_lamp_clouds_texture != '':
-        wrd.world_defs += '_LampClouds'
+    if wrd.arm_light_clouds_texture != '':
+        wrd.world_defs += '_LightClouds'
         assets.add_embedded_data('cloudstexture.png')
 
     if rpdat.rp_renderer == 'Deferred':
@@ -52,15 +52,16 @@ def add_world_defs():
         elif rpdat.rp_gi == 'Voxel AO':
             voxelao = True
     # Shadows
-    if rpdat.rp_shadowmap_cascades != '1':
-        if voxelgi:
-            log.warn('Disabling shadow cascades - Voxel GI does not support cascades yet')
-        else:
-            wrd.world_defs += '_CSM'
-            assets.add_khafile_def('arm_csm')
     if rpdat.rp_shadowmap == 'Off':
         wrd.world_defs += '_NoShadows'
         assets.add_khafile_def('arm_no_shadows')
+    else:
+        if rpdat.rp_shadowmap_cascades != '1':
+            if voxelgi:
+                log.warn('Disabling shadow cascades - Voxel GI does not support cascades yet')
+            else:
+                wrd.world_defs += '_CSM'
+                assets.add_khafile_def('arm_csm')
     # SS
     # if rpdat.rp_dfrs:
     #     wrd.world_defs += '_DFRS'
@@ -110,9 +111,13 @@ def add_world_defs():
     if arm.utils.get_gapi().startswith('direct3d'): # Flip Y axis in drawQuad command
         wrd.world_defs += '_InvY'
 
-    # Area lamps
-    for lamp in bpy.data.lamps:
-        if lamp.type == 'AREA':
+    if arm.utils.get_legacy_shaders() and not state.is_viewport:
+        wrd.world_defs += '_Legacy'
+
+    # Area lights
+    lights = bpy.data.lights if bpy.app.version >= (2, 80, 1) else bpy.data.lamps
+    for light in lights:
+        if light.type == 'AREA':
             wrd.world_defs += '_LTC'
             assets.add_khafile_def('arm_ltc')
             break
@@ -128,7 +133,7 @@ def build():
         arm.api.drivers[rpdat.rp_driver]['make_rpath']()
         return
 
-    assets_path = arm.utils.get_sdk_path() + 'armory/Assets/'
+    assets_path = arm.utils.get_sdk_path() + '/armory/Assets/'
     wrd = bpy.data.worlds['Arm']
 
     add_world_defs()
@@ -156,6 +161,11 @@ def build():
         if '_EnvClouds' in wrd.world_defs:
             assets.add(assets_path + 'noise256.png')
             assets.add_embedded_data('noise256.png')
+
+    if rpdat.rp_renderer == 'Deferred' and not rpdat.rp_compositornodes:
+            assets.add_shader_pass('copy_pass')
+    if rpdat.rp_renderer == 'Forward' and not rpdat.rp_compositornodes and rpdat.rp_render_to_texture:
+            assets.add_shader_pass('copy_pass')
 
     if rpdat.rp_render_to_texture:
         assets.add_khafile_def('rp_render_to_texture')
@@ -198,9 +208,10 @@ def build():
                 assets.add_embedded_data('luttexture.jpg')
             if '_CDOF' in wrd.compo_defs or '_CFXAA' in wrd.compo_defs or '_CSharpen' in wrd.compo_defs:
                 wrd.compo_defs += '_CTexStep'
+            if rpdat.rp_ppv_state != 'Off':
+                wrd.compo_defs += '_CPPV'
+
             assets.add_shader_pass('compositor_pass')
-        else:
-            assets.add_shader_pass('copy_pass')
 
         assets.add_khafile_def('rp_antialiasing={0}'.format(rpdat.rp_antialiasing))
 
@@ -296,13 +307,18 @@ def build():
         assets.add_khafile_def('rp_ocean')
         assets.add_shader_pass('water_pass')
 
-    if rpdat.rp_blending_state != 'Off':
+    if rpdat.rp_blending:
         assets.add_khafile_def('rp_blending')
+
+    if rpdat.rp_ppv_state:
+        assets.add_khafile_def('rp_ppv')
 
     if rpdat.rp_bloom:
         assets.add_khafile_def('rp_bloom')
         assets.add_shader_pass('bloom_pass')
         assets.add_shader_pass('blur_gaus_pass')
+
+    assets.add_shader_pass('ca_pass')
 
     if rpdat.rp_sss:
         assets.add_khafile_def('rp_sss')
@@ -343,14 +359,6 @@ def build():
                 wrd.world_defs += '_PenumbraScale'
         else:
             log.warn('Disabling soft shadows - "Armory Render Path - Cascades" requires to be set to 1 for now')
-
-    if rpdat.rp_ppv_state != 'Off':
-        wrd.compo_defs += "_PPV"
-        wrd.world_defs += '_PPV'
-        assets.add_khafile_def('rp_ppv')
-        #assets.add_khafile_def('rp_chromatic_aberration')
-        #assets.add_shader_pass('copy_pass')
-        #assets.add_shader_pass('chromatic_aberration_pass') #Todo: Make it separate as more shaders is introduced
 
     gbuffer2_direct = '_SSS' in wrd.world_defs or '_Hair' in wrd.world_defs or rpdat.arm_voxelgi_refraction
     gbuffer2 = '_Veloc' in wrd.world_defs or gbuffer2_direct

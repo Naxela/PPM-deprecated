@@ -16,14 +16,16 @@
 					"link": "_screenSize"
 				},
 				{
-					"name": "bloomStrengthModifier",
-					"link": "_bloomStrengthModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomRadiusPPV",
+					"link": "_bloomRadiusPPV"
 				},
 				{
-					"name": "bloomRadiusModifier",
-					"link": "_bloomRadiusModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomStrengthPPV",
+					"link": "_bloomStrengthPPV"
+				},
+				{
+					"name": "bloomAnamorphyPPV",
+					"link": "_bloomAnamorphyPPV"
 				}
 			],
 			"texture_params": [],
@@ -46,14 +48,16 @@
 					"link": "_screenSize"
 				},
 				{
-					"name": "bloomStrengthModifier",
-					"link": "_bloomStrengthModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomRadiusPPV",
+					"link": "_bloomRadiusPPV"
 				},
 				{
-					"name": "bloomRadiusModifier",
-					"link": "_bloomRadiusModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomStrengthPPV",
+					"link": "_bloomStrengthPPV"
+				},
+				{
+					"name": "bloomAnamorphyPPV",
+					"link": "_bloomAnamorphyPPV"
 				}
 			],
 			"texture_params": [],
@@ -79,14 +83,16 @@
 					"link": "_screenSize"
 				},
 				{
-					"name": "bloomStrengthModifier",
-					"link": "_bloomStrengthModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomRadiusPPV",
+					"link": "_bloomRadiusPPV"
 				},
 				{
-					"name": "bloomRadiusModifier",
-					"link": "_bloomRadiusModifier",
-					"ifdef": ["_PPV"]
+					"name": "bloomStrengthPPV",
+					"link": "_bloomStrengthPPV"
+				},
+				{
+					"name": "bloomAnamorphyPPV",
+					"link": "_bloomAnamorphyPPV"
 				}
 			],
 			"texture_params": [],

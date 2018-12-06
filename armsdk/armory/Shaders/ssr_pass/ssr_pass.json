@@ -24,29 +24,32 @@
 					"link": "_cameraPlaneProj"
 				},
 				{
-					"name": "ssrStepModifier",
-					"link": "_ssrStepModifier",
-					"ifdef": ["_PPV"]
+					"name": "ssrStepPPV",
+					"link": "_ssrStepPPV"
 				},
 				{
-					"name": "ssrStepMinModifier",
-					"link": "_ssrStepMinModifier",
-					"ifdef": ["_PPV"]
+					"name": "ssrStepMinPPV",
+					"link": "_ssrStepMinPPV"
 				},
 				{
-					"name": "ssrSearchModifier",
-					"link": "_ssrSearchModifier",
-					"ifdef": ["_PPV"]
+					"name": "ssrSearchPPV",
+					"link": "_ssrSearchPPV"
 				},
 				{
-					"name": "ssrFalloffModifier",
-					"link": "_ssrFalloffModifier",
-					"ifdef": ["_PPV"]
+					"name": "ssrFalloffPPV",
+					"link": "_ssrFalloffPPV"
 				},
 				{
-					"name": "ssrJitterModifier",
-					"link": "_ssrJitterModifier",
-					"ifdef": ["_PPV"]
+					"name": "ssrJitterPPV",
+					"link": "_ssrJitterPPV"
+				},
+				{
+					"name": "maxSteps",
+					"link": "_maxSteps"
+				},
+				{
+					"name": "ssrJitterPPV",
+					"link": "_ssrJitterPPV"
 				}
 			],
 			"texture_params": [],

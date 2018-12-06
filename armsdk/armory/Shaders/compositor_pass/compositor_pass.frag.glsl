@@ -1,6 +1,6 @@
 #version 450
 
-#include "compiled.glsl"
+#include "compiled.inc"
 #include "std/tonemap.glsl"
 #include "std/math.glsl"
 #include "std/colorgrading.glsl"
@@ -23,100 +23,57 @@ uniform sampler2D lutTexture;
 uniform sampler2D histogram;
 #endif
 
-//To do: Find out how to send the values through Vec3
-#ifdef _PPV
-//Global Values
-uniform float globalWhiteBalance;
-uniform float globalTintR;
-uniform float globalTintG;
-uniform float globalTintB;
-uniform float globalSaturationR;
-uniform float globalSaturationG;
-uniform float globalSaturationB;
-uniform float globalContrastR;
-uniform float globalContrastG;
-uniform float globalContrastB;
-uniform float globalGammaR;
-uniform float globalGammaG;
-uniform float globalGammaB;
-uniform float globalGainR;
-uniform float globalGainG;
-uniform float globalGainB;
-uniform float globalOffsetR;
-uniform float globalOffsetG;
-uniform float globalOffsetB;
-
-uniform float shadowSaturationR;
-uniform float shadowSaturationG;
-uniform float shadowSaturationB;
-uniform float shadowContrastR;
-uniform float shadowContrastG;
-uniform float shadowContrastB;
-uniform float shadowGammaR;
-uniform float shadowGammaG;
-uniform float shadowGammaB;
-uniform float shadowGainR;
-uniform float shadowGainG;
-uniform float shadowGainB;
-uniform float shadowOffsetR;
-uniform float shadowOffsetG;
-uniform float shadowOffsetB;
-uniform float shadowMax;
-
-uniform float midtonesSaturationR;
-uniform float midtonesSaturationG;
-uniform float midtonesSaturationB;
-uniform float midtonesContrastR;
-uniform float midtonesContrastG;
-uniform float midtonesContrastB;
-uniform float midtonesGammaR;
-uniform float midtonesGammaG;
-uniform float midtonesGammaB;
-uniform float midtonesGainR;
-uniform float midtonesGainG;
-uniform float midtonesGainB;
-uniform float midtonesOffsetR;
-uniform float midtonesOffsetG;
-uniform float midtonesOffsetB;
-
-uniform float highlightsSaturationR;
-uniform float highlightsSaturationG;
-uniform float highlightsSaturationB;
-uniform float highlightsContrastR;
-uniform float highlightsContrastG;
-uniform float highlightsContrastB;
-uniform float highlightsGammaR;
-uniform float highlightsGammaG;
-uniform float highlightsGammaB;
-uniform float highlightsGainR;
-uniform float highlightsGainG;
-uniform float highlightsGainB;
-uniform float highlightsOffsetR;
-uniform float highlightsOffsetG;
-uniform float highlightsOffsetB;
-uniform float highlightsMin;
-
-//Postprocess Effects
-uniform float vignetteModifier;
-uniform float filmGrain;
-uniform float letterboxSize;
-uniform float fogAmountA;
-uniform float fogAmountB;
-uniform float sharpen;
-
-uniform float dofDistance;
-uniform float dofLength;
-uniform float dofFStop;
-uniform float dofFocusX;
-uniform float dofFocusY;
-uniform int dofSamples;
-uniform int dofRings;
-#endif
-
 // #ifdef _CPos
 // uniform vec3 eye;
 // uniform vec3 eyeLook;
 // #endif
+
+#ifdef _CPPV
+uniform vec3 globalWeight;
+uniform vec3 globalTint;
+uniform vec3 globalSaturation;
+uniform vec3 globalContrast;
+uniform vec3 globalGamma;
+uniform vec3 globalGain;
+uniform vec3 globalOffset;
+uniform vec3 globalExposure;
+
+uniform vec3 shadowSaturation;
+uniform vec3 shadowContrast;
+uniform vec3 shadowGamma;
+uniform vec3 shadowGain;
+uniform vec3 shadowOffset;
+
+uniform vec3 midtoneSaturation;
+uniform vec3 midtoneContrast;
+uniform vec3 midtoneGamma;
+uniform vec3 midtoneGain;
+uniform vec3 midtoneOffset;
+
+uniform vec3 highlightSaturation;
+uniform vec3 highlightContrast;
+uniform vec3 highlightGamma;
+uniform vec3 highlightGain;
+uniform vec3 highlightOffset;
+
+uniform float lutPowerPPV;
+uniform float filmGrainPPV;
+uniform float letterboxRatioPPV;
+uniform float sharpenPower;
+uniform float VignettePower;
+uniform float dofDistance;
+uniform float dofFStop;
+uniform float dofLength;
+uniform float dofFocusX;
+uniform float dofFocusY;
+uniform float dofCOC;
+uniform float dofMaxBlur;
+uniform float dofThreshold;
+uniform float dofHighlightGain;
+uniform float dofBias;
+uniform float dofFringe;
+uniform float dofDither;
+#endif
 
 #ifdef _CGlare
 uniform vec3 light;
@@ -138,18 +95,7 @@ uniform float time;
 uniform float dynamicScale;
 #endif
 
-#ifdef _CFog
-	uniform vec2 cameraProj;
-#else
-	#ifdef _CDOF
-		uniform vec2 cameraProj;
-	#else
-		#ifdef _CGlare
-			uniform vec2 cameraProj;
-		#endif
-	#endif
-#endif
-
+uniform vec2 cameraProj;
 
 in vec2 texCoord;
 // #ifdef _CPos
@@ -168,19 +114,11 @@ out vec4 fragColor;
 	// float fogAmount = compoFogAmountB * exp(-rayOri.y * compoFogAmountA) * (1.0 - exp(-distance * rayDir.y * compoFogAmountA)) / rayDir.y;
 	// return mix(rgb, compoFogColor, fogAmount);
 // }
-	#ifdef _PPV
-		vec3 applyFog(vec3 rgb, float distance) {
-			// float fogAmount = 1.0 - exp(-distance * compoFogAmountA);
-			float fogAmount = 1.0 - exp(-distance * (fogAmountA / 100));
-			return mix(rgb, compoFogColor, fogAmount);
-		}
-	#else
-		vec3 applyFog(vec3 rgb, float distance) {
-			// float fogAmount = 1.0 - exp(-distance * compoFogAmountA);
-			float fogAmount = 1.0 - exp(-distance * (compoFogAmountA / 100));
-			return mix(rgb, compoFogColor, fogAmount);
-		}
-	#endif
+vec3 applyFog(vec3 rgb, float distance) {
+	// float fogAmount = 1.0 - exp(-distance * compoFogAmountA);
+	float fogAmount = 1.0 - exp(-distance * (compoFogAmountA / 100));
+	return mix(rgb, compoFogColor, fogAmount);
+}
 #endif
 
 vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
@@ -218,14 +156,11 @@ vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
 float vignette() {
 	// vignetting from iq
 	// return 0.4 + 0.6 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-		//return (vignetteModifier * 2) * 0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-		//return 0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-#ifdef _PPV
-		return (-vignetteModifier + 1) * 0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-#else
+	#ifdef _CPPV
+		return (0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2)) * VignettePower;
+	#else
 		return 0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-#endif
-
+	#endif
 }
 
 #ifdef _CGlare
@@ -336,24 +271,12 @@ void main() {
 	else fragColor.rgb = rgbB;
 
 #else
-
+	
 	#ifdef _CDOF
-	fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj);
+	fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, dofDistance, dofFStop, dofLength, dofFocusX, dofFocusY, dofCOC, dofMaxBlur, dofThreshold, dofHighlightGain, dofBias, dofFringe, dofDither);
 	#else
 	fragColor.rgb = texture(tex, texCo).rgb;
 	#endif
-
-/*
-	#ifdef _CDOF
-		#ifdef _PPV
-			fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, dofDistance, dofLength, dofFStop, vec2(dofFocusX, dofFocusY), dofSamples, dofRings);
-		#else
-			fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, compoDOFDistance, compoDOFLength, compoDOFFstop, vec2(dofFocusX, dofFocusY), dofSamples, dofRings);
-		#endif
-	#else
-	fragColor.rgb = texture(tex, texCo).rgb;
-	#endif
-*/
 
 #endif
 	
@@ -363,8 +286,9 @@ void main() {
 	vec3 col3 = texture(tex, texCo + vec2(-texStep.x, texStep.y) * 1.5).rgb;
 	vec3 col4 = texture(tex, texCo + vec2(texStep.x, texStep.y) * 1.5).rgb;
 	vec3 colavg = (col1 + col2 + col3 + col4) * 0.25;
-	#ifdef _PPV
-		fragColor.rgb += (fragColor.rgb - colavg) * sharpen;
+
+	#ifdef _CPPV
+		fragColor.rgb += (fragColor.rgb - colavg) * sharpenPower;
 	#else
 		fragColor.rgb += (fragColor.rgb - colavg) * compoSharpenStrength;
 	#endif
@@ -400,8 +324,9 @@ void main() {
 #ifdef _CGrain
 	// const float compoGrainStrength = 4.0;
 	float x = (texCo.x + 4.0) * (texCo.y + 4.0) * (time * 10.0);
-	#ifdef _PPV
-		fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * filmGrain;
+
+	#ifdef _CPPV
+		fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * filmGrainPPV;
 	#else
 		fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * compoGrainStrength;
 	#endif
@@ -412,7 +337,11 @@ void main() {
 #endif
 
 #ifdef _CExposure
-	fragColor.rgb *= compoExposureStrength;
+		fragColor.rgb *= compoExposureStrength;
+#endif
+
+#ifdef _CPPV
+	fragColor.rgb *= globalExposure.x;
 #endif
 
 #ifdef _AutoExposure
@@ -481,33 +410,22 @@ void main() {
 // #endif
 
 #ifdef _CLensTex
-	fragColor.rgb += texture(lensTexture, texCo).rgb;
+	//fragColor.rgb += texture(lensTexture, texCo).rgb;
+	vec4 scratches = texture(lensTexture, texCo);
+	vec3 scratchBlend = fragColor.rgb + scratches.rgb;
+	float center = smoothstep(0.0, 0.5, length(texCo - 0.5));
+	float luminance = dot(fragColor.rgb, vec3(0.299, 0.587, 0.114));
+	float brightnessMap = smoothstep(0.1, 0.4, luminance * center);
+	fragColor.rgb = clamp(mix(fragColor.rgb, scratchBlend, brightnessMap * 0.75), 0, 1);
+
 #endif
 
-#ifdef _CLetterbox
-	// const float compoLetterboxSize = 0.1;
-	#ifdef _PPV
-		fragColor.rgb *= 1.0 - step(0.5 - letterboxSize, abs(0.5 - texCo.y));
-	#else
-		fragColor.rgb *= 1.0 - step(0.5 - compoLetterboxSize, abs(0.5 - texCo.y));
-	#endif
-#endif
-
-//3D LUT Implementation from GPUGems 2 by Nvidia
-//https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter24.html
-
-#ifdef _CLUT
-	fragColor = LUTlookup(fragColor, lutTexture);
-#endif
-
-#ifdef _PPV
-
+#ifdef _CPPV
 	//Global Values
-		//TODO! - PUT THE COLORGRADING IN BEFORE THE LETTERBOX
 		//fragColor.rgb = WhiteBalance(fragColor.rgb, 7500, time);
 
 		float factor = 1;
-		float colorTempK = globalWhiteBalance;
+		float colorTempK = globalWeight.x;
 		vec3 ColorTempRGB = ColorTemperatureToRGB(colorTempK);
 
 		float originalLuminance = Luminance(fragColor.rgb);
@@ -515,39 +433,38 @@ void main() {
 		vec3 resultHSL = RGBtoHSL(blended);
 		vec3 luminancePreservedRGB = HSLtoRGB(vec3(resultHSL.x, resultHSL.y, originalLuminance));
 		fragColor = vec4(mix(blended, luminancePreservedRGB, LUMINANCE_PRESERVATION), 1.0);
-		//Todo - Fix luminance preservation (image is more blue'ish, maybe due to tonemapping conflicts)
 
 		mat3 CCSaturation = mat3 (													//Saturation
-			globalSaturationR * shadowSaturationR, globalSaturationG * shadowSaturationG, globalSaturationB * shadowSaturationB,				//Shadows + Global
-			globalSaturationR * midtonesSaturationR, globalSaturationG * midtonesSaturationG, globalSaturationB * midtonesSaturationB,				//Midtones + Global
-			globalSaturationR * highlightsSaturationR, globalSaturationG * highlightsSaturationG, globalSaturationB * highlightsSaturationB				//Highlights + Global
+			globalSaturation.r * shadowSaturation.r, globalSaturation.g * shadowSaturation.g, globalSaturation.b * shadowSaturation.b,				//Shadows + Global
+			globalSaturation.r * midtoneSaturation.r, globalSaturation.g * midtoneSaturation.g, globalSaturation.b * midtoneSaturation.b,				//Midtones + Global
+			globalSaturation.r * highlightSaturation.r, globalSaturation.g * highlightSaturation.g, globalSaturation.b * highlightSaturation.b				//Highlights + Global
 		);
 
 		mat3 CCContrast = mat3 (
-			globalContrastR * shadowContrastR, globalContrastG * shadowContrastG, globalContrastB * shadowContrastB,				//Shadows + Global
-			globalContrastR * midtonesContrastR, globalContrastG * midtonesContrastG, globalContrastB * midtonesContrastB,				//Midtones + Global
-			globalContrastR * highlightsContrastR, globalContrastG * highlightsContrastG, globalContrastB * highlightsContrastB				//Highlights + Global
+			globalContrast.r * shadowContrast.r, globalContrast.g * shadowContrast.g, globalContrast.b * shadowContrast.b,				//Shadows + Global
+			globalContrast.r * midtoneContrast.r, globalContrast.g * midtoneContrast.g, globalContrast.b * midtoneContrast.b,				//Midtones + Global
+			globalContrast.r * highlightContrast.r, globalContrast.g * highlightContrast.g, globalContrast.b * highlightContrast.b				//Highlights + Global
 		);
 
 		mat3 CCGamma = mat3 (
-			globalGammaR * shadowGammaR, globalGammaG * shadowGammaG, globalGammaB * shadowGammaB,				//Shadows + Global
-			globalGammaR * midtonesGammaR, globalGammaG * midtonesGammaG, globalGammaB * midtonesGammaB,				//Midtones + Global
-			globalGammaR * highlightsGammaR, globalGammaG * highlightsGammaG, globalGammaB * highlightsGammaB				//Highlights + Global
+			globalGamma.r * shadowGamma.r, globalGamma.g * shadowGamma.g, globalGamma.b * shadowGamma.b,				//Shadows + Global
+			globalGamma.r * midtoneGamma.r, globalGamma.g * midtoneGamma.g, globalGamma.b * midtoneGamma.b,				//Midtones + Global
+			globalGamma.r * highlightGamma.r, globalGamma.g * highlightGamma.g, globalGamma.b * highlightGamma.b				//Highlights + Global
 		);
 
 		mat3 CCGain = mat3 (
-			globalGainR * shadowGainR, globalGainG * shadowGainG, globalGainB * shadowGainB,				//Shadows + Global
-			globalGainR * midtonesGainR, globalGainG * midtonesGainG, globalGainB * midtonesGainB,				//Midtones + Global
-			globalGainR * highlightsGainR, globalGainG * highlightsGainG, globalGainB * highlightsGainB				//Highlights + Global
+			globalGain.r * shadowGain.r, globalGain.g * shadowGain.g, globalGain.b * shadowGain.b,				//Shadows + Global
+			globalGain.r * midtoneGain.r, globalGain.g * midtoneGain.g, globalGain.b * midtoneGain.b,				//Midtones + Global
+			globalGain.r * highlightGain.r, globalGain.g * highlightGain.g, globalGain.b * highlightGain.b			//Highlights + Global
 		);
 
 		mat3 CCOffset = mat3 (
-			globalOffsetR * shadowOffsetR, globalOffsetG * shadowOffsetG, globalOffsetB * shadowOffsetB,				//Shadows + Global
-			globalOffsetR * midtonesOffsetR, globalOffsetG * midtonesOffsetG, globalOffsetB * midtonesOffsetB,				//Midtones + Global
-			globalOffsetR * highlightsOffsetR, globalOffsetG * highlightsOffsetG, globalOffsetB	* highlightsOffsetB			//Highlights + Global
+			globalOffset.r * shadowOffset.r, globalOffset.g * shadowOffset.g, globalOffset.b * shadowOffset.b,				//Shadows + Global
+			globalOffset.r * midtoneOffset.r, globalOffset.g * midtoneOffset.g, globalOffset.b * midtoneOffset.b,				//Midtones + Global
+			globalOffset.r * highlightOffset.r, globalOffset.g * highlightOffset.g, globalOffset.b	* highlightOffset.b			//Highlights + Global
 		);
 
-		vec2 ToneWeights = vec2(shadowMax, highlightsMin);
+		vec2 ToneWeights = vec2(globalWeight.y, globalWeight.z);
 
 		fragColor.rgb = FinalizeColorCorrection(
 			fragColor.rgb, 
@@ -560,8 +477,28 @@ void main() {
 		);
 
 		//Tint
-		fragColor.rgb *= vec3(globalTintR,globalTintG,globalTintB);
+		fragColor.rgb *= vec3(globalTint.r,globalTint.g,globalTint.b);
 
+#endif
+
+//3D LUT Implementation from GPUGems 2 by Nvidia
+//https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter24.html
+
+#ifdef _CLUT
+	#ifdef _CPPV
+		fragColor = mix(fragColor,LUTlookup(fragColor, lutTexture),lutPowerPPV);
+	#else
+		fragColor = LUTlookup(fragColor, lutTexture);
+	#endif
+#endif
+
+#ifdef _CLetterbox
+	// const float compoLetterboxSize = 0.1;
+	#ifdef _CPPV
+		fragColor.rgb *= 1.0 - step(0.5 - letterboxRatioPPV, abs(0.5 - texCo.y));
+	#else
+		fragColor.rgb *= 1.0 - step(0.5 - compoLetterboxSize, abs(0.5 - texCo.y));
+	#endif
 #endif
 
 }

@@ -1,0 +1,59 @@
+{
+	"contexts": [
+		{
+			"name": "volumetric_light",
+			"depth_write": false,
+			"compare_mode": "greater",
+			"cull_mode": "counter_clockwise",
+			"links": [
+				{
+					"name": "LVWVP",
+					"link": "_lightVolumeWorldViewProjectionMatrix"
+				},
+				{
+					"name": "invVP",
+					"link": "_inverseViewProjectionMatrix"
+				},
+				{
+					"name": "LWVP",
+					"link": "_biasLightWorldViewProjectionMatrix"
+				},
+				{
+					"name": "shadowsBias",
+					"link": "_lightShadowsBias"
+				},
+				{
+					"name": "screenSize",
+					"link": "_screenSize"
+				},
+				{
+					"name": "eye",
+					"link": "_cameraPosition"
+				},
+				{
+					"name": "lightPos",
+					"link": "_lightPosition"
+				},
+				{
+					"name": "lightRadius",
+					"link": "_lightRadius"
+				},
+				{
+					"name": "snoise",
+					"link": "_blueNoise64"
+				},
+				{
+					"name": "lightProj",
+					"link": "_lightPlaneProj"
+				},
+				{
+					"name": "lightShadow",
+					"link": "_lightCastShadow"
+				}
+			],
+			"texture_params": [],
+			"vertex_shader": "../include/pass_light_volume.vert.glsl",
+			"fragment_shader": "volumetric_light.frag.glsl"
+		}
+	]
+}
