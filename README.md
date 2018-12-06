@@ -25,6 +25,10 @@ If you run your project now, you should now have a sidebar that will allow you t
 - Make a proper description
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+<<<<<<< HEAD
 - I'll update it properly to Armory 0.6 once it arrives. In the meantime, feel free to see if you can get it working, and feel free to look through the shaders.
 
 ![](img/PPV.gif)
+=======
+- I'll update it properly to Armory 0.6 once it arrives. In the meantime, feel free to see if you can get it working, and feel free to look through the shaders.
+>>>>>>> master
