@@ -1,6 +1,6 @@
 #version 450
 
-#include "compiled.glsl"
+#include "compiled.inc"
 #include "std/math.glsl"
 #include "std/gbuffer.glsl"
 
@@ -12,21 +12,21 @@ uniform mat4 P;
 uniform mat4 tiV;
 uniform vec2 cameraProj;
 
-// const int maxSteps = 20;
-// const int numBinarySearchSteps = 5;
+uniform float ssrStepPPV;
+uniform float ssrStepMinPPV;
+uniform float ssrSearchPPV;
+uniform float ssrFalloffPPV;
+uniform float ssrJitterPPV;
+//uniform int maxSteps;
+//uniform int numBinarySearchSteps;
+
+const int maxSteps = 100;
+const int numBinarySearchSteps = 100;
 // const float ssrRayStep = 0.04;
 // const float ssrMinRayStep = 0.05;
 // const float ssrSearchDist = 5.0;
 // const float ssrFalloffExp = 5.0;
 // const float ssrJitter = 0.6;
-
-#ifdef _PPV
-uniform float ssrStepModifier;
-uniform float ssrStepMinModifier;
-uniform float ssrSearchModifier;
-uniform float ssrFalloffModifier;
-uniform float ssrJitterModifier;
-#endif
 
 in vec3 viewRay;
 in vec2 texCoord;
@@ -53,11 +53,12 @@ float getDeltaDepth(vec3 hitCoord) {
 }
 
 vec4 binarySearch(vec3 dir) {	
-	// for (int i = 0; i < numBinarySearchSteps; i++) {
+	 for (int i = 0; i < numBinarySearchSteps; i++) {
 		dir *= 0.5;
 		hitCoord -= dir;
 		if (getDeltaDepth(hitCoord) < 0.0) hitCoord += dir;
 		
+		/*
 		dir *= 0.5;
 		hitCoord -= dir;
 		if (getDeltaDepth(hitCoord) < 0.0) hitCoord += dir;
@@ -76,30 +77,31 @@ vec4 binarySearch(vec3 dir) {
 		dir *= 0.5;
 		hitCoord -= dir;
 		if (getDeltaDepth(hitCoord) < 0.0) hitCoord += dir;
+		*/
 		
 		// Ugly discard of hits too far away
-		if (abs(getDeltaDepth(hitCoord)) > 0.01) {
+		
+	 }
+	 if (abs(getDeltaDepth(hitCoord)) > 0.01) {
 			return vec4(0.0);
 		}
-	// }
+
 	return vec4(getProjectedCoord(hitCoord), 0.0, 1.0);
 }
 
 vec4 rayCast(vec3 dir) {
-
-#ifdef _PPV
-	dir *= ssrStepModifier;
+	
+#ifdef _CPPV
+	dir *= ssrStepPPV;
 #else
 	dir *= ssrRayStep;
 #endif
-	
-	// for (int i = 0; i < maxSteps; i++) {
-		hitCoord += dir;
-		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
+	 for (int i = 0; i < maxSteps; i++) {
 		
 		hitCoord += dir;
 		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
-		hitCoord += dir;
+		
+		/*hitCoord += dir;
 		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
 		hitCoord += dir;
 		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
@@ -131,7 +133,9 @@ vec4 rayCast(vec3 dir) {
 		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
 		hitCoord += dir;
 		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);
-	// }
+		hitCoord += dir;
+		if (getDeltaDepth(hitCoord) > 0.0) return binarySearch(dir);*/ 
+	 }
 	return vec4(0.0);
 }
 
@@ -176,8 +180,8 @@ void main() {
 	vec3 reflected = normalize(reflect((viewPos), normalize(viewNormal.xyz)));
 	hitCoord = viewPos.xyz;
 	
-#ifdef _PPV
-	vec3 dir = reflected * max(ssrStepMinModifier, -viewPos.z) * (1.0 - rand(texCoord) * ssrJitterModifier * roughness);
+#ifdef _CPPV
+	vec3 dir = reflected * max(ssrStepMinPPV, -viewPos.z) * (1.0 - rand(texCoord) * ssrJitterPPV * roughness);
 #else
 	vec3 dir = reflected * max(ssrMinRayStep, -viewPos.z) * (1.0 - rand(texCoord) * ssrJitter * roughness);
 #endif
@@ -189,14 +193,14 @@ void main() {
 
 	float reflectivity = 1.0 - roughness;
 
-#ifdef _PPV
-	float intensity = pow(reflectivity, ssrFalloffModifier) *
-			screenEdgeFactor * clamp(-reflected.z, 0.0, 1.0) *
-			clamp((ssrSearchModifier - length(viewPos.xyz - hitCoord)) * (1.0 / ssrSearchModifier), 0.0, 1.0) * coords.w;
+#ifdef _CPPV
+	float intensity = pow(reflectivity, ssrFalloffPPV) *
+		screenEdgeFactor * clamp(-reflected.z, 0.0, 1.0) *
+		clamp((ssrSearchPPV - length(viewPos.xyz - hitCoord)) * (1.0 / ssrSearchPPV), 0.0, 1.0) * coords.w;
 #else
 	float intensity = pow(reflectivity, ssrFalloffExp) *
-			screenEdgeFactor * clamp(-reflected.z, 0.0, 1.0) *
-			clamp((ssrSearchDist - length(viewPos.xyz - hitCoord)) * (1.0 / ssrSearchDist), 0.0, 1.0) * coords.w;
+		screenEdgeFactor * clamp(-reflected.z, 0.0, 1.0) *
+		clamp((ssrSearchDist - length(viewPos.xyz - hitCoord)) * (1.0 / ssrSearchDist), 0.0, 1.0) * coords.w;
 #endif
 
 	intensity = clamp(intensity, 0.0, 1.0);

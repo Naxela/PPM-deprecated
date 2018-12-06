@@ -1,101 +1,245 @@
 package armory.renderpath;
 
 import iron.math.Vec4;
+import haxe.Timer;
 
 class PostProcessUniforms {
 
     //Colorgrading Modifiers
     ////////////////////////
-    //To do! - Find a way to pass RGB as vec3 variables
 
     //Postprocess Volume Configurations
     public static var LastVolumeSettings = [];
     public static var CurrentVolumeSettings = [];
 
-    //Check this to designate whether to be a value or a modifier
-    public static var OverrideIndex = [
-        0
+    //Todo: Make a queue system
+    //Todo: Make a fail-check system (for catching small time margin errors)
+    //Todo: Make more easing options (than just lerp for now)
+    //Todo: Look into injected? uniforms added into a later stage
+    //Todo: Bloom increase resolution/samples
+
+    private static function lerp(a:Float, b:Float, t:Float){
+        return a + t * (b - a);
+    }
+
+    public static function ppv_global_transition(ppvTransition:Dynamic, transitionTime:Float){
+
+        var startTime = Date.now().getTime();
+        var transitionTime = transitionTime * 1000;
+        var endTime = startTime + transitionTime;
+
+        var prevValues = [ for (x in 0...7) [ for (y in 0...3) ppv_global_uniforms[x][y]]];
+        
+        var timer = new Timer(1);
+        timer.run = function(){
+            var currentTime = Date.now().getTime();
+
+            if(currentTime < endTime){
+
+                var progress = (currentTime - startTime) / transitionTime;
+
+                for (x in 0...7){
+                    for (y in 0...3) {
+                        ppv_global_uniforms[x][y] = lerp(prevValues[x][y], ppvTransition[x][y], progress);
+                    }
+                }
+            } else 
+            {
+                timer.stop();
+            }
+        }
+    }
+
+    public static function ppv_shadow_transition(ppvTransition:Dynamic, transitionTime:Float, shadow_weight:Float){
+
+        var startTime = Date.now().getTime();
+        var transitionTime = transitionTime * 1000;
+        var endTime = startTime + transitionTime;
+
+        var prevValues = [ for (x in 0...5) [ for (y in 0...3) ppv_shadow_uniforms[x][y]]];
+        var prevWeight = ppv_global_uniforms[0][1];
+        
+        var timer = new Timer(1);
+        timer.run = function(){
+            var currentTime = Date.now().getTime();
+
+            if(currentTime < endTime){
+
+                var progress = (currentTime - startTime) / transitionTime;
+
+                for (x in 0...5){
+                    for (y in 0...3) {
+                        ppv_shadow_uniforms[x][y] = lerp(prevValues[x][y], ppvTransition[x][y], progress);
+                    }
+                }
+
+                ppv_global_uniforms[0][1] = lerp(prevWeight, shadow_weight, progress);
+
+            } else 
+            {
+                timer.stop();
+            }
+        }
+    }
+
+    public static function ppv_midtone_transition(ppvTransition:Dynamic, transitionTime:Float){
+
+        var startTime = Date.now().getTime();
+        var transitionTime = transitionTime * 1000;
+        var endTime = startTime + transitionTime;
+
+        var prevValues = [ for (x in 0...5) [ for (y in 0...3) ppv_midtone_uniforms[x][y]]];
+        
+        var timer = new Timer(1);
+        timer.run = function(){
+            var currentTime = Date.now().getTime();
+
+            if(currentTime < endTime){
+
+                var progress = (currentTime - startTime) / transitionTime;
+
+                for (x in 0...5){
+                    for (y in 0...3) {
+                        ppv_midtone_uniforms[x][y] = lerp(prevValues[x][y], ppvTransition[x][y], progress);
+                    }
+                }
+            } else 
+            {
+                timer.stop();
+            }
+        }
+    }
+
+    public static function ppv_highlight_transition(ppvTransition:Dynamic, transitionTime:Float, highlight_weight:Float){
+
+        var startTime = Date.now().getTime();
+        var transitionTime = transitionTime * 1000;
+        var endTime = startTime + transitionTime;
+
+        var prevValues = [ for (x in 0...5) [ for (y in 0...3) ppv_highlight_uniforms[x][y]]];
+        var prevWeight = ppv_global_uniforms[0][2];
+        
+        var timer = new Timer(1);
+        timer.run = function(){
+            var currentTime = Date.now().getTime();
+
+            if(currentTime < endTime){
+
+                var progress = (currentTime - startTime) / transitionTime;
+
+                for (x in 0...5){
+                    for (y in 0...3) {
+                        ppv_highlight_uniforms[x][y] = lerp(prevValues[x][y], ppvTransition[x][y], progress);
+                    }
+                }
+
+                ppv_global_uniforms[0][2] = lerp(prevWeight, highlight_weight, progress);
+
+            } else 
+            {
+                timer.stop();
+            }
+        }
+    }
+
+    public static var ppv_global_uniforms = [
+        [6500.0, 1.0, 0.0],         //Whitebalance, Shadow Max, Highlight Min
+        [1.0, 1.0, 1.0],            //Tint
+        [1.0, 1.0, 1.0],            //Saturation
+        [1.0, 1.0, 1.0],            //Contrast
+        [1.0, 1.0, 1.0],            //Gamma
+        [1.0, 1.0, 1.0],            //Gain
+        [1.0, 1.0, 1.0],            //Offset
+        [1.0, 1.0, 1.0]             //Exposure
     ];
 
-    //Global vec3 values
-    public static var global_whitebalance = 7500.0;
-    public static var global_tint_r = 1.0;
-    public static var global_tint_g = 1.0;
-    public static var global_tint_b = 1.0;
-    public static var global_saturation_r = 1.0;
-    public static var global_saturation_g = 1.0;
-    public static var global_saturation_b = 1.0;
-    public static var global_contrast_r = 1.0;
-    public static var global_contrast_g = 1.0;
-    public static var global_contrast_b = 1.0;
-    public static var global_gamma_r = 1.0;
-    public static var global_gamma_g = 1.0;
-    public static var global_gamma_b = 1.0;
-    public static var global_gain_r = 1.0;
-    public static var global_gain_g = 1.0;
-    public static var global_gain_b = 1.0;
-    public static var global_offset_r = 1.0;
-    public static var global_offset_g = 1.0;
-    public static var global_offset_b = 1.0;
+    public static var ppv_shadow_uniforms = [
+        [1.0, 1.0, 1.0], //Saturation
+        [1.0, 1.0, 1.0], //Contrast
+        [1.0, 1.0, 1.0], //Gamma
+        [1.0, 1.0, 1.0], //Gain
+        [1.0, 1.0, 1.0] //Offset
+    ];
 
-    //Shadow vec3 values
-    public static var shadow_saturation_r = 1.0;
-    public static var shadow_saturation_g = 1.0;
-    public static var shadow_saturation_b = 1.0;
-    public static var shadow_contrast_r = 1.0;
-    public static var shadow_contrast_g = 1.0;
-    public static var shadow_contrast_b = 1.0;
-    public static var shadow_gamma_r = 1.0;
-    public static var shadow_gamma_g = 1.0;
-    public static var shadow_gamma_b = 1.0;
-    public static var shadow_gain_r = 1.0;
-    public static var shadow_gain_g = 1.0;
-    public static var shadow_gain_b = 1.0;
-    public static var shadow_offset_r = 1.0;
-    public static var shadow_offset_g = 1.0;
-    public static var shadow_offset_b = 1.0;
-    public static var shadow_max = 0.0;
+    public static var ppv_midtone_uniforms = [
+        [1.0, 1.0, 1.0], //Saturation
+        [1.0, 1.0, 1.0], //Contrast
+        [1.0, 1.0, 1.0], //Gamma
+        [1.0, 1.0, 1.0], //Gain
+        [1.0, 1.0, 1.0] //Offset
+    ];
 
-    //Midtones vec3 values
-    public static var midtones_saturation_r = 1.0;
-    public static var midtones_saturation_g = 1.0;
-    public static var midtones_saturation_b = 1.0;
-    public static var midtones_contrast_r = 1.0;
-    public static var midtones_contrast_g = 1.0;
-    public static var midtones_contrast_b = 1.0;
-    public static var midtones_gamma_r = 1.0;
-    public static var midtones_gamma_g = 1.0;
-    public static var midtones_gamma_b = 1.0;
-    public static var midtones_gain_r = 1.0;
-    public static var midtones_gain_g = 1.0;
-    public static var midtones_gain_b = 1.0;
-    public static var midtones_offset_r = 1.0;
-    public static var midtones_offset_g = 1.0;
-    public static var midtones_offset_b = 1.0;
+    public static var ppv_highlight_uniforms = [
+        [1.0, 1.0, 1.0], //Saturation
+        [1.0, 1.0, 1.0], //Contrast
+        [1.0, 1.0, 1.0], //Gamma
+        [1.0, 1.0, 1.0], //Gain
+        [1.0, 1.0, 1.0] //Offset
+    ];
 
-    //Highlights vec3 values
-    public static var highlights_saturation_r = 1.0;
-    public static var highlights_saturation_g = 1.0;
-    public static var highlights_saturation_b = 1.0;
-    public static var highlights_contrast_r = 1.0;
-    public static var highlights_contrast_g = 1.0;
-    public static var highlights_contrast_b = 1.0;
-    public static var highlights_gamma_r = 1.0;
-    public static var highlights_gamma_g = 1.0;
-    public static var highlights_gamma_b = 1.0;
-    public static var highlights_gain_r = 1.0;
-    public static var highlights_gain_g = 1.0;
-    public static var highlights_gain_b = 1.0;
-    public static var highlights_offset_r = 1.0;
-    public static var highlights_offset_g = 1.0;
-    public static var highlights_offset_b = 1.0;
-    public static var highlights_min = 1.0;
+    public static var ppv_postprocess_uniforms2:Array<Dynamic> = [
+        [3.5, 3.0, 1.0, [1.0, 1.0], [1.0, 1.0, 1.0]],     //0 - Bloom [0:Threshold, 1:Strength, 2:Radius, 3:Anamorphy, 4:Tint]
+        [2.0, 1.0, 0.5],      //1 - SSAO [0: Size, 1: Strength, 2:Scale]
+        [0.04, 0.05, 5.0, 5.0, 0.6]      //2 - SSR [0:Step, 1:StepMin, 2:Search, 3:Falloff, 4:Jitter]
+    ];
+
+    //TODO: REORGANIZE PROPERLY
+    public static var ppv_postprocess_uniforms = [
+        3.5,        //0 - Bloom: Strength
+        3.0,        //1 - Bloom: Radius
+        1.0,        //2 - Bloom: Threshold
+        1.0,        //3 - Bloom: X
+        1.0,        //4 - Bloom: Y
+
+        1.0,        //5 R
+        1.0,        //6 G
+        1.0,        //7 B
+
+        1.0,        //8 - LUT: Power
+        0.04,       //9 - SSR: Step
+        0.05,       //10 - SSR: StepMin
+        5.0,        //11 - SSR: Search
+        5.0,        //12 - SSR: Falloff
+        0.6,        //13 - SSR: Jitter
+        2.0,        //14 - Film Grain: Strength
+        0.01,       //15 - SSRS: Step
+        0.1,        //16 - Letterbox: Ratio
+        1,          //17 - Penumbra: Scale
+        1.0,        //18 - Penumbra: Distance
+        0.25,       //19 - Sharpen Scale
+        1,          //20 - Vignette
+        3.0,        //21 - VXGI Diffuse
+        1.0,        //22 - VXGI Specular
+        1.0,        //23 - VXGI Occlusion
+        0.0,        //24 - VXGI EnvMap
+        1.0,        //25 - VXGI Step
+        2.0,        //26 - VXGI Range
+        1.0,         //27 - VXGI Offset
+
+        0.0,        //DOF Distance //Distance 0 default is off
+        128.0,      //DOF FStop
+        160.0,      //DOF Length
+        0.5,        //DOF Focus X
+        0.5,        //DOF Focus Y
+        0.11,       //DOF COC
+        1.0,        //DOF Maxblur
+        0.5,        //DOF Threshold
+        2.0,        //DOF Highlight Gain
+        0.5,        //DOF Bias
+        0.7,        //DOF Fringe
+        0.0001,     //39 DOF Dither
+        2.0,        //40 RTGI Step
+        1.0,        //41 Strength
+        8,          //42 Max Steps
+        0.0         //43 Fringe
+
+    ];
 
     //Post Process Modifiers
     ////////////////////////
-    public static var bloom_strength_modifier = 3.5; //Default: bloomStrength
-    public static var bloom_radius_modifier = 3.0; //Default: bloomRadius
-    public static var bloom_threshold_modifier = 1.0; //Default: bloomThreshold
+    //public static var bloom_strength_modifier = 3.5; //Default: bloomStrength
+    //public static var bloom_radius_modifier = 3.0; //Default: bloomRadius
+    //public static var bloom_threshold_modifier = 1.0; //Default: bloomThreshold
     //Todo - Anamorphic bloom (ie. J.J.Abrams lights)
     //Bloom horizontal scaling
     //Bloom tinting

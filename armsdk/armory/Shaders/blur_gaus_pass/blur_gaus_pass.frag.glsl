@@ -1,16 +1,14 @@
 // Exclusive to bloom for now
 #version 450
 
-#include "compiled.glsl"
+#include "compiled.inc"
 
 uniform sampler2D tex;
 uniform vec2 dir;
 uniform vec2 screenSize;
-
-#ifdef _PPV
-uniform float bloomStrengthModifier;
-uniform float bloomRadiusModifier;
-#endif
+uniform float bloomRadiusPPV;
+uniform float bloomStrengthPPV;
+uniform vec2 bloomAnamorphyPPV;
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -19,8 +17,8 @@ const float weight[10] = float[] (0.132572, 0.125472, 0.106373, 0.08078, 0.05495
 
 void main() {
 
-#ifdef _PPV
-	vec2 step = (dir / screenSize.xy) * bloomRadiusModifier;
+#ifdef _CPPV
+	vec2 step = (dir * bloomAnamorphyPPV / screenSize.xy) * bloomRadiusPPV;
 #else
 	vec2 step = (dir / screenSize.xy) * bloomRadius;
 #endif
@@ -46,8 +44,8 @@ void main() {
 	fragColor.rgb += texture(tex, texCoord + step * 9.5).rgb * weight[9];
 	fragColor.rgb += texture(tex, texCoord - step * 9.5).rgb * weight[9];
 
-#ifdef _PPV
-	fragColor.rgb *= bloomStrengthModifier / 5;
+#ifdef _CPPV
+	fragColor.rgb *= bloomStrengthPPV / 5;
 #else
 	fragColor.rgb *= bloomStrength / 5;
 #endif

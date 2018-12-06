@@ -44,6 +44,7 @@ def register_nodes():
         LogicNodeCategory('LogicSoundNodes', 'Sound', items=arm_nodes.category_items['Sound']),
         LogicNodeCategory('LogicNativeNodes', 'Native', items=arm_nodes.category_items['Native']),
         LogicNodeCategory('LogicCanvasNodes', 'Canvas', items=arm_nodes.category_items['Canvas']),
+        LogicNodeCategory('LogicPPVNodes', 'PPV', items=arm_nodes.category_items['PPV']),
     ]
 
     nodeitems_utils.register_node_categories('ArmLogicNodes', node_categories)
@@ -65,6 +66,7 @@ class ArmLogicNodePanel(bpy.types.Panel):
         layout = self.layout
         if context.active_node != None and context.active_node.bl_idname.startswith('LN'):
             layout.prop(context.active_node, 'arm_logic_id')
+            layout.prop(context.active_node, 'arm_watch')
             layout.operator('arm.open_node_source')
 
 class ArmOpenNodeSource(bpy.types.Operator):

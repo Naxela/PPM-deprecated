@@ -1,5 +1,6 @@
 import bpy
 import webbrowser
+import os, glob
 from bpy.types import Menu, Panel, UIList
 from bpy.props import *
 import arm.utils
@@ -38,23 +39,6 @@ class ObjectPropsPanel(bpy.types.Panel):
 
         if obj.type == 'MESH':
             layout.prop(obj, 'arm_instanced')
-            if obj.arm_instanced:
-                layout.label('Location')
-                column = layout.column()
-                column.prop(obj, 'arm_instanced_loc_x')
-                column.prop(obj, 'arm_instanced_loc_y')
-                column.prop(obj, 'arm_instanced_loc_z')
-                # layout.label('Rotation')
-                # row = layout.row()
-                # row.prop(obj, 'arm_instanced')
-                # row.prop(obj, 'arm_instanced')
-                # row.prop(obj, 'arm_instanced')
-                # layout.label('Scale')
-                # row = layout.row()
-                # row.prop(obj, 'arm_instanced')
-                # row.prop(obj, 'arm_instanced')
-                # row.prop(obj, 'arm_instanced')
-
             wrd = bpy.data.worlds['Arm']
             layout.prop_search(obj, "arm_tilesheet", wrd, "arm_tilesheetlist", "Tilesheet")
             if obj.arm_tilesheet != '':
@@ -91,7 +75,6 @@ class ParticlesPropsPanel(bpy.types.Panel):
             return
 
         layout.prop(obj.settings, 'arm_loop')
-        layout.prop(obj.settings, 'arm_gpu_sim')
         layout.prop(obj.settings, 'arm_count_mult')
 
 class PhysicsPropsPanel(bpy.types.Panel):
@@ -151,7 +134,7 @@ class DataPropsPanel(bpy.types.Panel):
             # if obj.type == 'MESH':
                 # layout.prop(obj.data, 'arm_sdfgen')
             layout.operator("arm.invalidate_cache")
-        elif obj.type == 'LAMP':
+        elif obj.type == 'LIGHT' or obj.type == 'LAMP': # TODO: LAMP is deprecated
             row = layout.row(align=True)
             col = row.column()
             col.prop(obj.data, 'arm_clip_start')
@@ -159,9 +142,9 @@ class DataPropsPanel(bpy.types.Panel):
             col = row.column()
             col.prop(obj.data, 'arm_fov')
             col.prop(obj.data, 'arm_shadows_bias')
-            layout.prop(wrd, 'arm_lamp_texture')
-            layout.prop(wrd, 'arm_lamp_ies_texture')
-            layout.prop(wrd, 'arm_lamp_clouds_texture')
+            layout.prop(wrd, 'arm_light_texture')
+            layout.prop(wrd, 'arm_light_ies_texture')
+            layout.prop(wrd, 'arm_light_clouds_texture')
         elif obj.type == 'SPEAKER':
             layout.prop(obj.data, 'arm_play_on_start')
             layout.prop(obj.data, 'arm_loop')
@@ -233,7 +216,10 @@ class MaterialPropsPanel(bpy.types.Panel):
         row = layout.row()
         column = row.column()
         column.prop(mat, 'arm_cast_shadow')
-        column.prop(mat, 'arm_receive_shadow')
+        columnb = column.column()
+        wrd = bpy.data.worlds['Arm']
+        columnb.enabled = len(wrd.arm_rplist) > 0 and arm.utils.get_rp().rp_renderer == 'Forward'
+        columnb.prop(mat, 'arm_receive_shadow')
         column.separator()
         column.prop(mat, 'arm_two_sided')
         columnb = column.column()
@@ -255,25 +241,29 @@ class MaterialPropsPanel(bpy.types.Panel):
 
         row = layout.row()
         col = row.column()
-        col.label('Custom Material:')
+        col.label('Custom Material')
         col.prop(mat, 'arm_custom_material', text="")
         col = row.column()
-        col.label('Skip Context:')
+        col.label('Skip Context')
         col.prop(mat, 'arm_skip_context', text="")
 
         row = layout.row()
         col = row.column()
-        col.label('Particle')
-        col.prop(mat, 'arm_particle', text="")
-        colb = col.column()
-        colb.enabled = mat.arm_particle == 'gpu'
-        colb.prop(mat, 'arm_particle_fade')
+        col.prop(mat, 'arm_particle_fade')
+        col.prop(mat, 'arm_tilesheet_mat')
         col = row.column()
         col.label('Billboard')
         col.prop(mat, 'arm_billboard', text="")
-        row = layout.row()
-        row.prop(mat, 'arm_tilesheet_mat')
-        row.prop(mat, 'arm_blending')
+
+        layout.prop(mat, 'arm_blending')
+        col = layout.column()
+        col.enabled = mat.arm_blending
+        col.prop(mat, 'arm_blending_source')
+        col.prop(mat, 'arm_blending_destination')
+        col.prop(mat, 'arm_blending_operation')
+        col.prop(mat, 'arm_blending_source_alpha')
+        col.prop(mat, 'arm_blending_destination_alpha')
+        col.prop(mat, 'arm_blending_operation_alpha')
 
         layout.operator("arm.invalidate_material_cache")
 
@@ -380,12 +370,14 @@ class ArmoryProjectPanel(bpy.types.Panel):
         col.prop(wrd, 'arm_batch_materials')
         col.prop(wrd, 'arm_sampled_animation')
         col.prop(wrd, 'arm_asset_compression')
+        col.prop(wrd, 'arm_compiler_inline')
         col = row.column()
         col.prop(wrd, 'arm_minimize')
         col.prop(wrd, 'arm_optimize_mesh')
         col.prop(wrd, 'arm_deinterleaved_buffers')
         col.prop(wrd, 'arm_export_tangents')
         col.prop(wrd, 'arm_write_config')
+        col.prop(wrd, 'arm_loadscreen')
         row = box.row(align=True)
         row.alignment = 'EXPAND'
         row.prop(wrd, 'arm_texture_quality')
@@ -403,16 +395,20 @@ class ArmoryProjectPanel(bpy.types.Panel):
         col2 = col.column()
         col2.enabled = wrd.arm_winresize
         col2.prop(wrd, 'arm_winmaximize')
-        col.prop(wrd, 'arm_winminimize')
         col = row.column()
+        col.prop(wrd, 'arm_winminimize')
         col.prop(wrd, 'arm_vsync')
-        col.prop(wrd, 'arm_loadscreen')
+        
 
         layout.label('Modules')
         box = layout.box().column()
         box.prop(wrd, 'arm_audio')
         box.prop(wrd, 'arm_physics')
+        if wrd.arm_physics != 'Disabled':
+            box.prop(wrd, 'arm_physics_engine')
         box.prop(wrd, 'arm_navigation')
+        if wrd.arm_navigation != 'Disabled':
+            box.prop(wrd, 'arm_navigation_engine')
         box.prop(wrd, 'arm_ui')
         box.prop(wrd, 'arm_hscript')
         box.prop(wrd, 'arm_formatlib')
@@ -489,7 +485,7 @@ class ArmoryPlayButton(bpy.types.Operator):
         if not arm.utils.check_engine(self):
             return {"CANCELLED"}
 
-        arm.utils.check_default_rp()
+        arm.utils.check_default_props()
 
         assets.invalidate_enabled = False
         make.play(is_viewport=False)
@@ -527,7 +523,7 @@ class ArmoryBuildProjectButton(bpy.types.Operator):
 
         arm.utils.check_projectpath(self)
 
-        arm.utils.check_default_rp()
+        arm.utils.check_default_props()
 
         wrd = bpy.data.worlds['Arm']
         item = wrd.arm_exporterlist[wrd.arm_exporterlist_index]
@@ -566,7 +562,7 @@ class ArmoryPublishProjectButton(bpy.types.Operator):
 
         arm.utils.check_projectpath(self)
 
-        arm.utils.check_default_rp()
+        arm.utils.check_default_props()
 
         wrd = bpy.data.worlds['Arm']
         item = wrd.arm_exporterlist[wrd.arm_exporterlist_index]
@@ -608,6 +604,10 @@ class ArmoryKodeStudioButton(bpy.types.Operator):
     def execute(self, context):
         if not arm.utils.check_saved(self):
             return {"CANCELLED"}
+
+        if bpy.data.worlds['Arm'].arm_play_runtime != 'Browser' or not os.path.exists(arm.utils.get_fp() + "/khafile.js"):
+            print('Generating HTML5 project for Kode Studio')
+            make.build('html5')
 
         arm.utils.kode_studio()
         return{'FINISHED'}
@@ -689,14 +689,15 @@ class ArmRenderPathPanel(bpy.types.Panel):
         box = layout.box().column()
         row = box.row()
         row.prop(rpdat, "rp_renderer", expand=True)
-        row = box.row()
-        row.enabled = rpdat.rp_renderer == 'Forward'
-        row.prop(rpdat, 'rp_depthprepass')
-        box.prop(rpdat, "arm_material_model")
+        col = box.column()
+        col.enabled = rpdat.rp_renderer == 'Forward'
+        col.prop(rpdat, 'rp_depthprepass')
+        col.prop(rpdat, "arm_material_model")
         box.prop(rpdat, "rp_translucency_state")
         box.prop(rpdat, "rp_overlays_state")
         box.prop(rpdat, "rp_decals_state")
         box.prop(rpdat, "rp_blending_state")
+        box.prop(rpdat, "rp_ppv_state")
         box.prop(rpdat, 'arm_samples_per_pixel')
         box.prop(rpdat, 'arm_texture_filter')
         box.prop(rpdat, "arm_diffuse_model")
@@ -719,8 +720,8 @@ class ArmRenderPathPanel(bpy.types.Panel):
             columnb.prop(rpdat, 'arm_tess_shadows_inner')
             columnb.prop(rpdat, 'arm_tess_shadows_outer')  
 
+        box.prop(rpdat, 'arm_particles')
         box.prop(rpdat, 'arm_skin')
-        box.prop(rpdat, 'rp_ppv_state')
         row = box.row()
         row.enabled = rpdat.arm_skin.startswith('GPU')
         row.prop(rpdat, 'arm_skin_max_bones_auto')
@@ -741,10 +742,8 @@ class ArmRenderPathPanel(bpy.types.Panel):
         col.prop(rpdat, 'rp_shadowmap_cascades')
         col2 = col.column()
         col2.enabled = rpdat.rp_shadowmap_cascades != '1'
-        row = col2.row(align=True)
-        row.alignment = 'EXPAND'
-        row.prop(rpdat, 'arm_shadowmap_split')
-        row.prop(rpdat, 'arm_shadowmap_bounds')
+        col2.prop(rpdat, 'arm_shadowmap_split')
+        col.prop(rpdat, 'arm_shadowmap_bounds')
         col.prop(rpdat, 'arm_soft_shadows')
         col2 = col.column()
         col2.enabled = rpdat.arm_soft_shadows != 'Off'
@@ -794,7 +793,7 @@ class ArmRenderPathPanel(bpy.types.Panel):
         row.alignment = 'EXPAND'
         row.prop(rpdat, 'arm_voxelgi_step')
         row.prop(rpdat, 'arm_voxelgi_range')
-        col.prop(rpdat, 'arm_voxelgi_offset');
+        col.prop(rpdat, 'arm_voxelgi_offset')
 
         layout.label('World')
         box = layout.box().column()
@@ -1084,6 +1083,8 @@ class ArmLodPanel(bpy.types.Panel):
             row = layout.row()
             row.prop(item, "screen_size_prop")
 
+        layout.prop(mdata, "arm_lod_material")
+
         # Auto lod for meshes
         if obj.type == 'MESH':
             layout.separator()
@@ -1093,7 +1094,7 @@ class ArmLodPanel(bpy.types.Panel):
             row.prop(wrd, 'arm_lod_gen_levels')
             row.prop(wrd, 'arm_lod_gen_ratio')
 
-        layout.prop(mdata, "arm_lod_material")
+        
 
 class ArmTilesheetPanel(bpy.types.Panel):
     bl_label = "Armory Tilesheet"
@@ -1247,6 +1248,85 @@ class ArmPrintTraitsButton(bpy.types.Operator):
                     print('Object {0} - {1}'.format(o.name, tname))
         return{'FINISHED'}
 
+class ArmMaterialCCZero(bpy.types.Operator):
+    bl_idname = 'arm.import_cczero_materials'
+    bl_label = 'Import CC0 Textures'
+    bl_description = 'Import textures from CC0Textures.com'
+    def execute(self, context):
+
+        active_tree = bpy.context.object.active_material.node_tree
+        active_node = active_tree.nodes.active
+        if 'Group' in active_tree.nodes:
+                
+            main_shader = active_tree.nodes["Group"]
+            mat_output = active_tree.nodes["Material Output"]
+            if hasattr(active_node, 'image'):
+                active_image = active_node.image
+                active_node_position = active_node.location
+                if hasattr(active_image, 'filepath'):
+                    filepath = active_image.filepath
+                    filename = filepath.split("\\")[-1]
+                    filename_length = len(filename)
+                    folderpath = filepath[:-filename_length]
+                    format_types = ["*.jpeg", "*.png"]
+                    map_types = ["col", "AO", "disp", "nrm", "rgh", "mask"]
+                    map_types.remove(filename[:-4].split("_")[-1])
+
+                    os.chdir(folderpath)
+                    for file in glob.glob("*.jpg"):
+                        
+                        type = file[:-4].split("_")[-1]
+                        bpy.data.images.load(folderpath + file, check_existing=True)
+                        active_tree.nodes.new(type="ShaderNodeTexImage")
+                        newNode = active_tree.nodes[-1]
+                        newNode.location[0] = active_node_position[0]
+                        newNode.name = file
+                        newNode.label = file
+                        newNode.image = bpy.data.images[file]
+                        active_tree.nodes[-1].location[0] = active_node_position[0]
+                        
+                        if(type == "AO"):
+                            newNode.location[1] = active_node_position[1] - 300
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[2])
+                        elif(type == "col"):
+                            newNode.location[1] = active_node_position[1] - 000
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[0])
+                        elif(type == "mask"):
+                            newNode.location[1] = active_node_position[1] - 300
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[1])
+                        elif(type == "disp"):
+                            newNode.location[1] = active_node_position[1] - 1200
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[7])
+                            active_tree.links.new(main_shader.outputs[1], mat_output.inputs[2])
+                        elif(type == "nrm"):
+                            newNode.color_space = "NONE"
+                            newNode.location[1] = active_node_position[1] - 900
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[5])
+                        elif(type == "rgh"):
+                            newNode.location[1] = active_node_position[1] - 600
+                            active_tree.links.new(newNode.outputs[0], main_shader.inputs[3])
+
+                        print("Textures imported")
+                        
+                else:
+                    print("Make sure your image node points to a CC0Textures file")
+            else:
+                print("Have you selected an image node?")
+        else:
+            print("No Armory PBR Group")
+
+        return{'FINISHED'}
+
+class ArmMaterialTextureHaven(bpy.types.Operator):
+    bl_idname = 'arm.import_texturehaven_materials'
+    bl_label = 'Import Texturehaven textures'
+    bl_description = 'Import textures from texturehaven.com'
+    def execute(self, context):
+        
+        print("Texturehaven Import - TODO!")
+
+        return{'FINISHED'}
+
 class ArmMaterialNodePanel(bpy.types.Panel):
     bl_label = 'Armory Material Node'
     bl_idname = 'ArmMaterialNodePanel'
@@ -1258,277 +1338,8 @@ class ArmMaterialNodePanel(bpy.types.Panel):
         n = context.active_node
         if n != None and (n.bl_idname == 'ShaderNodeRGB' or n.bl_idname == 'ShaderNodeValue' or n.bl_idname == 'ShaderNodeTexImage'):
             layout.prop(context.active_node, 'arm_material_param')
-
-class ArmPPVPanel(bpy.types.Panel):
-    bl_label = "Armory Post-Process Volume"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "data"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        layout = self.layout
-        obj = bpy.context.object
-
-        #To do check if mesh
-        if obj != None and obj.type == 'MESH' :
-
-            layout.label("Post-Process Volume")
-            col = layout.column(align=True)
-            row = col.row(align=True)
-
-            row.prop(obj, "arm_PPV")
-            if obj.arm_PPV:
-            
-                row = col.row(align=True)
-                row.prop(obj, "arm_PPV_transition_time")
-                row = col.row(align=True)
-                row.label("Colorgrading Settings")
-                box = layout.box().column()
-                box.label("Colorgrading Clamps")
-                box.prop(obj, "arm_PPV_colorgrading_shadows_max")
-                box.prop(obj, "arm_PPV_colorgrading_highlights_min")
-                box.label("Colorgrading Context")
-                row = box.row()
-                row.prop(obj, "arm_PPV_colorgrading_context", expand=True)
-                box.label("Value Mode")
-                row = box.row()
-                row.prop(obj, "arm_PPV_colorgrading_value_mode", expand=True)
-
-                if obj.arm_PPV_colorgrading_context == "Global":
-                    col = box.column()
-                    row = box.row(align=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Uniform":
-                        col.prop(obj, "arm_PPV_colorgrading_global_whitebalance")
-                        col.prop(obj, "arm_PPV_colorgrading_global_saturation")
-                        col.prop(obj, "arm_PPV_colorgrading_global_contrast")
-                        col.prop(obj, "arm_PPV_colorgrading_global_gamma")
-                        col.prop(obj, "arm_PPV_colorgrading_global_gain")
-                        col.prop(obj, "arm_PPV_colorgrading_global_offset")
-                    if obj.arm_PPV_colorgrading_value_mode == "RGB":
-                        row.alignment = 'EXPAND'
-                        row.label("Saturation")
-                        row.prop(obj, "arm_PPV_colorgrading_global_saturation_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_saturation_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_saturation_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Contrast")
-                        row.prop(obj, "arm_PPV_colorgrading_global_contrast_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_contrast_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_contrast_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gamma")
-                        row.prop(obj, "arm_PPV_colorgrading_global_gamma_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_gamma_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_gamma_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gain")
-                        row.prop(obj, "arm_PPV_colorgrading_global_gain_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_gain_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_gain_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Offset")
-                        row.prop(obj, "arm_PPV_colorgrading_global_offset_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_offset_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_global_offset_b", expand=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Colorwheel":
-                        col.prop(obj, "arm_PPV_colorgrading_global_saturation_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_global_contrast_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_global_gamma_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_global_gain_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_global_offset_wheel")
-
-                if obj.arm_PPV_colorgrading_context == "Shadows":
-                        
-                    col = box.column()
-                    row = box.row(align=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Uniform":
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_saturation")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_contrast")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_gamma")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_gain")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_offset")
-                    if obj.arm_PPV_colorgrading_value_mode == "RGB":
-                        row.alignment = 'EXPAND'
-                        row.label("Saturation")
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_saturation_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_saturation_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_saturation_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Contrast")
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_contrast_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_contrast_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_contrast_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gamma")
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gamma_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gamma_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gamma_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gain")
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gain_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gain_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_gain_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Offset")
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_offset_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_offset_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_shadows_offset_b", expand=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Colorwheel":
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_saturation_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_contrast_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_gamma_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_gain_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_shadows_offset_wheel")
-
-                if obj.arm_PPV_colorgrading_context == "Midtones":
-                        
-                    col = box.column()
-                    row = box.row(align=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Uniform":
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_saturation")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_contrast")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_gamma")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_gain")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_offset")
-                    if obj.arm_PPV_colorgrading_value_mode == "RGB":
-                        row.alignment = 'EXPAND'
-                        row.label("Saturation")
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_saturation_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_saturation_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_saturation_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Contrast")
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_contrast_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_contrast_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_contrast_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gamma")
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gamma_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gamma_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gamma_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gain")
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gain_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gain_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_gain_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Offset")
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_offset_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_offset_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_midtones_offset_b", expand=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Colorwheel":
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_saturation_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_contrast_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_gamma_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_gain_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_midtones_offset_wheel")
-
-                if obj.arm_PPV_colorgrading_context == "Highlights":
-                        
-                    col = box.column()
-                    row = box.row(align=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Uniform":
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_saturation")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_contrast")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_gamma")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_gain")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_offset")
-                    if obj.arm_PPV_colorgrading_value_mode == "RGB":
-                        row.alignment = 'EXPAND'
-                        row.label("Saturation")
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_saturation_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_saturation_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_saturation_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Contrast")
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_contrast_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_contrast_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_contrast_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gamma")
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gamma_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gamma_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gamma_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Gain")
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gain_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gain_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_gain_b", expand=True)
-                        row = box.row(align=True)
-                        row.label("Offset")
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_offset_r", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_offset_g", expand=True)
-                        row.prop(obj, "arm_PPV_colorgrading_highlights_offset_b", expand=True)
-                    if obj.arm_PPV_colorgrading_value_mode == "Colorwheel":
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_saturation_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_contrast_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_gamma_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_gain_wheel")
-                        col.prop(obj, "arm_PPV_colorgrading_highlights_offset_wheel")
-
-                layout.label("Post-Process Overrides")
-                box = layout.box().column()
-                row = col.row(align=True)
-                col = box.column()
-                col.label("Bloom")
-                row = box.row(align=True)
-                row.alignment = 'EXPAND'
-                row.prop(obj, 'arm_PPV_bloom_threshold')
-                row.prop(obj, 'arm_PPV_bloom_strength')
-                col.prop(obj, 'arm_PPV_bloom_radius')
-                col = box.column()
-                col.label("Chromatic Aberration")
-                col.prop(obj, "arm_PPV_chromatic_aberration_strength")
-                col.prop(obj, "arm_PPV_chromatic_aberration_samples")
-                col.label("Film Grain")
-                col.prop(obj, "arm_PPV_film_grain_strength")
-                col = box.column()
-                col.label("Screen-Space Reflection")
-                row = col.row(align=True)
-                row.alignment = 'EXPAND'
-                row.prop(obj, 'arm_PPV_SSR_step')
-                row.prop(obj, 'arm_PPV_SSR_step_min')
-                row = col.row(align=True)
-                row.alignment = 'EXPAND'
-                row.prop(obj, 'arm_PPV_SSR_search')
-                row.prop(obj, 'arm_PPV_SSR_falloff')
-                col.prop(obj, 'arm_PPV_SSR_jitter')
-                col.label("Vignette")
-                col.prop(obj, 'arm_PPV_vignette')
-
-                
-                #col = box.column()
-                #row = box.row(align=True)
-                #row = col.row(align=True)
-                #row.label("Colorgrading Settings")
-                #box = layout.box().column()
-
-class ArmAddArmoryObjects(bpy.types.Menu):
-    bl_idname = "ArmAddArmoryObjects"
-    bl_label = "Armory Objects"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'
-
-        layout.operator("arm.add_ppv", text="Post-Process Volume")
-
-class ArmAddPPV(bpy.types.Operator):
-    bl_idname = "arm.add_ppv"
-    bl_label = "Add Post-process Volume"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        #import_object("BOMB")
-        bpy.ops.object.empty_add(type='CUBE', view_align=False, location=(0, 0, 0))
-        bpy.context.object.name = "PPV_001"
-        bpy.context.object.arm_PPV = True
-
-        return {'FINISHED'}
-
-def ArmoryAddMenuFunc(self, context):
-    self.layout.menu("ArmAddArmoryObjects")
+        layout.operator("arm.import_cczero_materials")
+        layout.operator("arm.import_texturehaven_materials")
 
 def register():
     bpy.utils.register_class(ObjectPropsPanel)
@@ -1568,12 +1379,9 @@ def register():
     bpy.utils.register_class(ArmSyncProxyButton)
     bpy.utils.register_class(ArmPrintTraitsButton)
     bpy.utils.register_class(ArmMaterialNodePanel)
+    bpy.utils.register_class(ArmMaterialCCZero)
+    bpy.utils.register_class(ArmMaterialTextureHaven)
     bpy.types.VIEW3D_HT_header.append(draw_view3d_header)
-    bpy.utils.register_class(ArmPPVPanel)
-    bpy.utils.register_class(ArmAddArmoryObjects)
-    bpy.utils.register_class(ArmAddPPV)
-    bpy.types.VIEW3D_HT_header.append(draw_view3d_header)
-    bpy.types.INFO_MT_add.append(ArmoryAddMenuFunc)
 
 def unregister():
     bpy.types.VIEW3D_HT_header.remove(draw_view3d_header)
@@ -1614,6 +1422,5 @@ def unregister():
     bpy.utils.unregister_class(ArmSyncProxyButton)
     bpy.utils.unregister_class(ArmPrintTraitsButton)
     bpy.utils.unregister_class(ArmMaterialNodePanel)
-    bpy.utils.unregister_class(ArmPPVPanel)
-    bpy.utils.unregister_class(ArmAddArmoryObjects)
-    bpy.types.INFO_MT_add.remove(ArmoryAddMenuFunc)
+    bpy.utils.unregister_class(ArmMaterialCCZero)
+    bpy.utils.unregister_class(ArmMaterialTextureHaven)
