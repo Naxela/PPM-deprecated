@@ -1,3 +1,5 @@
+![](img/wip_notice.jpg)
+
 # PPV_Volumes
 PPV Volume is an addon for Armory3D that implements volumes that controls or triggers changes
 of the values provided to the shaders in Armory.
@@ -24,3 +26,5 @@ If you run your project now, you should now have a sidebar that will allow you t
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 - I'll update it properly to Armory 0.6 once it arrives. In the meantime, feel free to see if you can get it working, and feel free to look through the shaders.
+
+![](img/PPV.gif)
