@@ -1,0 +1,150 @@
+{
+    "shader_datas": [
+        {
+            "contexts": [
+                {
+                    "compare_mode": "always",
+                    "cull_mode": "none",
+                    "constants": [
+                        {
+                            "link": "_time",
+                            "name": "time",
+                            "type": "float"
+                        },
+                        {
+                            "name": "globalWeight",
+                            "link": "_globalWeight",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalTint",
+                            "link": "_globalTint",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalSaturation",
+                            "link": "_globalSaturation",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalContrast",
+                            "link": "_globalContrast",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalGamma",
+                            "link": "_globalGamma",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalGain",
+                            "link": "_globalGain",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalOffset",
+                            "link": "_globalOffset",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "globalExposure",
+                            "link": "_globalExposure",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "shadowSaturation",
+                            "link": "_shadowSaturation",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "shadowContrast",
+                            "link": "_shadowContrast",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "shadowGamma",
+                            "link": "_shadowGamma",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "shadowGain",
+                            "link": "_shadowGain",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "shadowOffset",
+                            "link": "_shadowOffset",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "midtoneSaturation",
+                            "link": "_midtoneSaturation",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "midtoneContrast",
+                            "link": "_midtoneContrast",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "midtoneGamma",
+                            "link": "_midtoneGamma",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "midtoneGain",
+                            "link": "_midtoneGain",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "midtoneOffset",
+                            "link": "_midtoneOffset",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "highlightSaturation",
+                            "link": "_highlightSaturation",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "highlightContrast",
+                            "link": "_highlightContrast",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "highlightGamma",
+                            "link": "_highlightGamma",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "highlightGain",
+                            "link": "_highlightGain",
+                            "type": "vec3"
+                        },
+                        {
+                            "name": "highlightOffset",
+                            "link": "_highlightOffset",
+                            "type": "vec3"
+                        }
+                    ],
+                    "depth_write": false,
+                    "fragment_shader": "colorgrading_pass.frag",
+                    "name": "colorgrading_pass",
+                    "texture_units": [
+                        {
+                            "name": "tex"
+                        }
+                    ],
+                    "vertex_elements": [
+                        {
+                            "data": "float2",
+                            "name": "pos"
+                        }
+                    ],
+                    "vertex_shader": "colorgrading_pass.vert"
+                }
+            ],
+            "name": "colorgrading_pass"
+        }
+    ]
+}
