@@ -774,7 +774,7 @@ class ArmRenderPathRendererPanel(bpy.types.Panel):
         layout.prop(rpdat, "rp_hdr")
         layout.prop(rpdat, "rp_stereo")
         layout.prop(rpdat, 'arm_culling')
-        layout.prop(rpdat, 'rp_ppv')
+        layout.prop(rpdat, 'rp_ppm')
 
 class ArmRenderPathShadowsPanel(bpy.types.Panel):
     bl_label = "Shadows"

@@ -30,9 +30,9 @@ class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
     bl_label = 'Colorgrading Global'
     bl_icon = 'QUESTION'
 
+    # TODO: RRESET FILE OPTION FOR THE BELOW
     property0 : EnumProperty(
-        items = [('Preset File', 'Preset File', 'Preset File'),
-                 ('RGB', 'RGB', 'RGB'),
+        items = [('RGB', 'RGB', 'RGB'),
                  ('Uniform', 'Uniform', 'Uniform')],
         name='Mode', default='Uniform', update=update_node)
     property1 : StringProperty(name="Loaded Data", description="Loaded data - Just ignore", default="")
@@ -86,4 +86,4 @@ class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
             layout.prop(self, 'filepath')
             layout.prop(self, 'property1')
 
-add_node(ColorgradingGlobalNode, category='PPV')
+add_node(ColorgradingGlobalNode, category='PPM')

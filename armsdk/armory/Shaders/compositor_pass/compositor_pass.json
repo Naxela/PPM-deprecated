@@ -79,117 +79,117 @@
 				{
 					"name": "globalWeight",
 					"link": "_globalWeight",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalTint",
 					"link": "_globalTint",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalSaturation",
 					"link": "_globalSaturation",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalContrast",
 					"link": "_globalContrast",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalGamma",
 					"link": "_globalGamma",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalGain",
 					"link": "_globalGain",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalOffset",
 					"link": "_globalOffset",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "globalExposure",
 					"link": "_globalExposure",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "shadowSaturation",
 					"link": "_shadowSaturation",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "shadowContrast",
 					"link": "_shadowContrast",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "shadowGamma",
 					"link": "_shadowGamma",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "shadowGain",
 					"link": "_shadowGain",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "shadowOffset",
 					"link": "_shadowOffset",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "midtoneSaturation",
 					"link": "_midtoneSaturation",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "midtoneContrast",
 					"link": "_midtoneContrast",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "midtoneGamma",
 					"link": "_midtoneGamma",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "midtoneGain",
 					"link": "_midtoneGain",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "midtoneOffset",
 					"link": "_midtoneOffset",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "highlightSaturation",
 					"link": "_highlightSaturation",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "highlightContrast",
 					"link": "_highlightContrast",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "highlightGamma",
 					"link": "_highlightGamma",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "highlightGain",
 					"link": "_highlightGain",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				},
 				{
 					"name": "highlightOffset",
 					"link": "_highlightOffset",
-					"ifdef": ["_CPPV"]
+					"ifdef": ["_CPPM"]
 				}
 			],
 			"texture_params": [],

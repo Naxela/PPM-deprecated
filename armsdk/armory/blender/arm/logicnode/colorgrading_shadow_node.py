@@ -30,9 +30,9 @@ class ColorgradingShadowNode(Node, ArmLogicTreeNode):
     bl_label = 'Colorgrading Shadow'
     bl_icon = 'QUESTION'
 
+    # TODO: RRESET FILE OPTION FOR THE BELOW
     property0 : EnumProperty(
-        items = [('Preset File', 'Preset File', 'Preset File'),
-                 ('RGB', 'RGB', 'RGB'),
+        items = [('RGB', 'RGB', 'RGB'),
                  ('Uniform', 'Uniform', 'Uniform')],
         name='Mode', default='Uniform', update=update_node)
     property1 : StringProperty(name="Loaded Data", description="Loaded data - Just ignore", default="")
@@ -82,4 +82,4 @@ class ColorgradingShadowNode(Node, ArmLogicTreeNode):
             layout.prop(self, 'filepath')
             layout.prop(self, 'property1')
 
-add_node(ColorgradingShadowNode, category='PPV')
+add_node(ColorgradingShadowNode, category='PPM')

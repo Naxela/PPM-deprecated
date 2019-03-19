@@ -25,9 +25,9 @@ class ColorgradingMidtoneNode extends LogicNode {
         if(property0 == "Uniform"){
 
             for (i in 0...4){
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][0] = inputs[i+2].get();
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][1] = inputs[i+2].get();
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][2] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][0] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][1] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][2] = inputs[i+2].get();
             }
 
         } else if (property0 == "RGB") {
@@ -35,9 +35,9 @@ class ColorgradingMidtoneNode extends LogicNode {
             armory.renderpath.PPV.colorgrading_highlight_uniforms[0][0] = inputs[1].get();
 
             for (i in 0...4){
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][0] = inputs[i+1].get().x;
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][1] = inputs[i+1].get().y;
-                armory.renderpath.PPV.colorgrading_midtone_uniforms[i][2] = inputs[i+1].get().z;
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][0] = inputs[i+1].get().x;
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][1] = inputs[i+1].get().y;
+                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][2] = inputs[i+1].get().z;
             }
 
         } else if (property0 == "Preset File") {

@@ -22,9 +22,9 @@ class RenderPathCreator {
 		path = new RenderPath();
 		Inc.init(path);
 
-		#if rp_ppv
+		#if rp_ppm
 		iron.App.notifyOnInit(function() {
-			PPV.init();
+			PPM.init();
 		});
 		#end
 		

@@ -6,7 +6,7 @@
 #ifdef _CDOF
 #include "std/dof.glsl"
 #endif
-#ifdef _CPPV
+#ifdef _CPPM
 #include "std/colorgrading.glsl"
 #endif
 
@@ -27,7 +27,7 @@ uniform sampler2D lutTexture;
 uniform sampler2D histogram;
 #endif
 
-#ifdef _CPPV
+#ifdef _CPPM
 uniform vec3 globalWeight;
 uniform vec3 globalTint;
 uniform vec3 globalSaturation;
@@ -104,7 +104,7 @@ vec3 applyFog(vec3 rgb, float distance) {
 }
 #endif
 
-#ifdef _CPPV
+#ifdef _CPPM
 float ComputeEV100(const float aperture2, const float shutterTime, const float ISO) {
     return log2(aperture2 / shutterTime * 100.0 / ISO);
 }
@@ -335,8 +335,8 @@ void main() {
 	fragColor.rgb *= compoExposureStrength;
 #endif
 
-#ifdef _CPPV
-	fragColor.rgb *= ComputeEV(0.0);
+#ifdef _CPPM
+	//fragColor.rgb *= ComputeEV(0.0);
 #endif
 
 #ifdef _AutoExposure
@@ -406,7 +406,7 @@ void main() {
 	// fragColor.rgb += compoBrightness;
 // #endif
 
-#ifdef _CPPV
+#ifdef _CPPM
 	//Global Values
 		//fragColor.rgb = WhiteBalance(fragColor.rgb, 7500, time);
 

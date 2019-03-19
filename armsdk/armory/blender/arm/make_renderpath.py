@@ -202,8 +202,8 @@ def build():
                 wrd.compo_defs += '_CTexStep'
             if '_CDOF' in wrd.compo_defs or '_CFog' in wrd.compo_defs or '_CGlare' in wrd.compo_defs:
                 wrd.compo_defs += '_CCameraProj'
-            if rpdat.rp_ppv:
-                wrd.compo_defs += '_CPPV'
+            if rpdat.rp_ppm:
+                wrd.compo_defs += '_CPPM'
         
             assets.add_shader_pass('compositor_pass')
 
@@ -342,8 +342,8 @@ def build():
     if rpdat.rp_dynres:
         assets.add_khafile_def('rp_dynres')
 
-    if rpdat.rp_ppv:
-        assets.add_khafile_def('rp_ppv')
+    if rpdat.rp_ppm:
+        assets.add_khafile_def('rp_ppm')
 
     # if rpdat.arm_soft_shadows == 'On':
     #     if rpdat.rp_shadowmap_cascades == '1':

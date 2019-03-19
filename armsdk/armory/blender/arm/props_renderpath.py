@@ -40,7 +40,7 @@ def update_preset(self, context):
         rpdat.arm_texture_filter = 'Anisotropic'
         rpdat.arm_irradiance = True
         rpdat.arm_radiance = True
-        rpdat.rp_ppv = False
+        rpdat.rp_ppm = False
     elif self.rp_preset == 'Mobile':
         rpdat.rp_renderer = 'Forward'
         rpdat.rp_depthprepass = False
@@ -74,7 +74,7 @@ def update_preset(self, context):
         rpdat.arm_texture_filter = 'Linear'
         rpdat.arm_irradiance = True
         rpdat.arm_radiance = False
-        rpdat.rp_ppv = False
+        rpdat.rp_ppm = False
     elif self.rp_preset == 'Max':
         rpdat.rp_renderer = 'Deferred'
         rpdat.rp_shadows = True
@@ -113,7 +113,7 @@ def update_preset(self, context):
         rpdat.arm_texture_filter = 'Anisotropic'
         rpdat.arm_irradiance = True
         rpdat.arm_radiance = True
-        rpdat.rp_ppv = False
+        rpdat.rp_ppm = False
     elif self.rp_preset == '2D/Baked':
         rpdat.rp_renderer = 'Forward'
         rpdat.rp_depthprepass = False
@@ -147,7 +147,7 @@ def update_preset(self, context):
         rpdat.arm_texture_filter = 'Linear'
         rpdat.arm_irradiance = False
         rpdat.arm_radiance = False
-        rpdat.rp_ppv = False
+        rpdat.rp_ppm = False
     update_renderpath(self, context)
 
 def update_renderpath(self, context):
@@ -330,7 +330,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
     rp_stereo: BoolProperty(name="VR", description="Stereo rendering", default=False, update=update_renderpath)
     rp_greasepencil: BoolProperty(name="Grease Pencil", description="Render Grease Pencil data", default=False, update=update_renderpath)
     rp_ocean: BoolProperty(name="Ocean", description="Ocean pass", default=False, update=update_renderpath)
-    rp_ppv: BoolProperty(name="PPV", description="Post-Process Volumes - Adjustable realtime shaders", default=False, update=update_renderpath)
+    rp_ppm: BoolProperty(name="PPM", description="Post-Process Volumes - Adjustable realtime shaders", default=False, update=update_renderpath)
     rp_gi: EnumProperty(
         items=[('Off', 'Off', 'Off'),
                ('Voxel GI', 'Voxel GI', 'Voxel GI', 'ERROR', 1),

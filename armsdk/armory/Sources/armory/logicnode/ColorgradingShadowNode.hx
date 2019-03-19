@@ -24,12 +24,12 @@ class ColorgradingShadowNode extends LogicNode {
 
         if(property0 == "Uniform"){
 
-            armory.renderpath.PPV.colorgrading_global_uniforms[0][1] = inputs[1].get();
+            armory.renderpath.PPM.colorgrading_global_uniforms[0][1] = inputs[1].get();
 
             for (i in 0...5){
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get();
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get();
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get();
             }
 
             //trace(inputs[6].get());
@@ -39,9 +39,9 @@ class ColorgradingShadowNode extends LogicNode {
             armory.renderpath.PPV.colorgrading_global_uniforms[0][2] = inputs[1].get();
 
             for (i in 0...5){
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get().x;
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get().y;
-                armory.renderpath.PPV.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get().z;
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get().x;
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get().y;
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get().z;
             }
 
         } else if (property0 == "Preset File") {
