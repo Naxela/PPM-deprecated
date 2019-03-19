@@ -3,7 +3,6 @@
 		{
 			"name": "compositor_pass",
 			"depth_write": false,
-			"color_write_alpha": false,
 			"compare_mode": "always",
 			"cull_mode": "none",
 			"links": [
@@ -70,7 +69,7 @@
 				{
 					"name": "cameraProj",
 					"link": "_cameraPlaneProj",
-					"ifdef": ["_CFog", "_CDOF", "_CGlare"]
+					"ifdef": ["_CCameraProj"]
 				},
 				{
 					"name": "lutTexture",
@@ -190,91 +189,6 @@
 				{
 					"name": "highlightOffset",
 					"link": "_highlightOffset",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "lutPowerPPV",
-					"link": "_lutPowerPPV",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "filmGrainPPV",
-					"link": "_filmGrainPPV",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "letterboxRatioPPV",
-					"link": "_letterboxRatioPPV",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "sharpenPower",
-					"link": "_sharpenPower",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "VignettePower",
-					"link": "_VignettePower",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofDistance",
-					"link": "_dofDistance",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofFStop",
-					"link": "_dofFStop",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofLength",
-					"link": "_dofLength",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofFocusX",
-					"link": "_dofFocusX",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofFocusY",
-					"link": "_dofFocusY",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofCOC",
-					"link": "_dofCOC",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofMaxBlur",
-					"link": "_dofMaxBlur",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofThreshold",
-					"link": "_dofThreshold",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofHighlightGain",
-					"link": "_dofHighlightGain",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofBias",
-					"link": "_dofBias",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofFringe",
-					"link": "_dofFringe",
-					"ifdef": ["_CPPV"]
-				},
-				{
-					"name": "dofDither",
-					"link": "_dofDither",
 					"ifdef": ["_CPPV"]
 				}
 			],

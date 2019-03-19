@@ -3,13 +3,17 @@
 #include "compiled.inc"
 #include "std/tonemap.glsl"
 #include "std/math.glsl"
-#include "std/colorgrading.glsl"
 #ifdef _CDOF
 #include "std/dof.glsl"
 #endif
+#ifdef _CPPV
+#include "std/colorgrading.glsl"
+#endif
 
 uniform sampler2D tex;
+#ifdef _CDepth
 uniform sampler2D gbufferD;
+#endif
 
 #ifdef _CLensTex
 uniform sampler2D lensTexture;
@@ -22,11 +26,6 @@ uniform sampler2D lutTexture;
 #ifdef _Hist
 uniform sampler2D histogram;
 #endif
-
-// #ifdef _CPos
-// uniform vec3 eye;
-// uniform vec3 eyeLook;
-// #endif
 
 #ifdef _CPPV
 uniform vec3 globalWeight;
@@ -55,24 +54,6 @@ uniform vec3 highlightContrast;
 uniform vec3 highlightGamma;
 uniform vec3 highlightGain;
 uniform vec3 highlightOffset;
-
-uniform float lutPowerPPV;
-uniform float filmGrainPPV;
-uniform float letterboxRatioPPV;
-uniform float sharpenPower;
-uniform float VignettePower;
-uniform float dofDistance;
-uniform float dofFStop;
-uniform float dofLength;
-uniform float dofFocusX;
-uniform float dofFocusY;
-uniform float dofCOC;
-uniform float dofMaxBlur;
-uniform float dofThreshold;
-uniform float dofHighlightGain;
-uniform float dofBias;
-uniform float dofFringe;
-uniform float dofDither;
 #endif
 
 #ifdef _CGlare
@@ -95,7 +76,9 @@ uniform float time;
 uniform float dynamicScale;
 #endif
 
+#ifdef _CCameraProj
 uniform vec2 cameraProj;
+#endif
 
 in vec2 texCoord;
 // #ifdef _CPos
@@ -121,6 +104,27 @@ vec3 applyFog(vec3 rgb, float distance) {
 }
 #endif
 
+#ifdef _CPPV
+float ComputeEV100(const float aperture2, const float shutterTime, const float ISO) {
+    return log2(aperture2 / shutterTime * 100.0 / ISO);
+}
+float ConvertEV100ToExposure(float EV100) {
+    return 0.833333 * exp2(-EV100);
+}
+float ComputeEV(float avgLuminance) {
+    const float aperture  = globalExposure.x;
+    const float aperture2 = aperture * aperture;
+    const float shutterTime = 1.0 / globalExposure.y;
+    const float ISO = globalExposure.z;
+    const float EC = 1.0;
+
+    float EV100 = ComputeEV100(aperture2, shutterTime, ISO);
+
+    return ConvertEV100ToExposure(EV100 - EC) * PI;
+}
+#endif
+
+#ifdef _CLUT
 vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
 
     //Clamp to prevent weird results
@@ -144,24 +148,20 @@ vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
     texelPosition2.x = (quad2.x * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.r);
     texelPosition2.y = (quad2.y * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.g);
 
-    lowp vec4 newColor1 = texture(lookupTable, texelPosition1);
-    lowp vec4 newColor2 = texture(lookupTable, texelPosition2);
+    lowp vec4 newColor1 = textureLod(lookupTable, texelPosition1, 0.0);
+    lowp vec4 newColor2 = textureLod(lookupTable, texelPosition2, 0.0);
 
     lowp vec4 colorGradedResult = mix(newColor1, newColor2, fract(blueColor));
 
     return colorGradedResult;
-
 }
+#endif
 
+#ifdef _CVignette
 float vignette() {
-	// vignetting from iq
-	// return 0.4 + 0.6 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-	#ifdef _CPPV
-		return (0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2)) * VignettePower;
-	#else
-		return 0.3 + 0.7 * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-	#endif
+	return (1.0 - compoVignetteStrength) + compoVignetteStrength * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
 }
+#endif
 
 #ifdef _CGlare
 // Based on lense flare implementation by musk
@@ -219,7 +219,7 @@ void main() {
 #endif
 
 #ifdef _CDepth
-	float depth = texture(gbufferD, texCo).r * 2.0 - 1.0;
+	float depth = textureLod(gbufferD, texCo, 0.0).r * 2.0 - 1.0;
 #endif
 
 #ifdef _CFXAA
@@ -233,11 +233,11 @@ void main() {
 	vec2 tcrgbSE = (texCo + vec2(1.0, 1.0) * texStep);
 	vec2 tcrgbM = vec2(texCo);
 	
-	vec3 rgbNW = texture(tex, tcrgbNW).rgb;
-	vec3 rgbNE = texture(tex, tcrgbNE).rgb;
-	vec3 rgbSW = texture(tex, tcrgbSW).rgb;
-	vec3 rgbSE = texture(tex, tcrgbSE).rgb;
-	vec3 rgbM  = texture(tex, tcrgbM).rgb;
+	vec3 rgbNW = textureLod(tex, tcrgbNW, 0.0).rgb;
+	vec3 rgbNE = textureLod(tex, tcrgbNE, 0.0).rgb;
+	vec3 rgbSW = textureLod(tex, tcrgbSW, 0.0).rgb;
+	vec3 rgbSE = textureLod(tex, tcrgbSE, 0.0).rgb;
+	vec3 rgbM  = textureLod(tex, tcrgbM, 0.0).rgb;
 	vec3 luma = vec3(0.299, 0.587, 0.114);
 	float lumaNW = dot(rgbNW, luma);
 	float lumaNE = dot(rgbNE, luma);
@@ -260,11 +260,11 @@ void main() {
 			  dir * rcpDirMin)) * texStep;
 			  
 	vec3 rgbA = 0.5 * (
-		texture(tex, texCo + dir * (1.0 / 3.0 - 0.5)).rgb +
-		texture(tex, texCo + dir * (2.0 / 3.0 - 0.5)).rgb);
+		textureLod(tex, texCo + dir * (1.0 / 3.0 - 0.5), 0.0).rgb +
+		textureLod(tex, texCo + dir * (2.0 / 3.0 - 0.5), 0.0).rgb);
 	vec3 rgbB = rgbA * 0.5 + 0.25 * (
-		texture(tex, texCo + dir * -0.5).rgb +
-		texture(tex, texCo + dir * 0.5).rgb);
+		textureLod(tex, texCo + dir * -0.5, 0.0).rgb +
+		textureLod(tex, texCo + dir * 0.5, 0.0).rgb);
 	
 	float lumaB = dot(rgbB, luma);
 	if ((lumaB < lumaMin) || (lumaB > lumaMax)) fragColor.rgb = rgbA;
@@ -273,25 +273,20 @@ void main() {
 #else
 	
 	#ifdef _CDOF
-	fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, dofDistance, dofFStop, dofLength, dofFocusX, dofFocusY, dofCOC, dofMaxBlur, dofThreshold, dofHighlightGain, dofBias, dofFringe, dofDither);
+	fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj);
 	#else
-	fragColor.rgb = texture(tex, texCo).rgb;
+	fragColor.rgb = textureLod(tex, texCo, 0.0).rgb;
 	#endif
 
 #endif
 	
 #ifdef _CSharpen
-	vec3 col1 = texture(tex, texCo + vec2(-texStep.x, -texStep.y) * 1.5).rgb;
-	vec3 col2 = texture(tex, texCo + vec2(texStep.x, -texStep.y) * 1.5).rgb;
-	vec3 col3 = texture(tex, texCo + vec2(-texStep.x, texStep.y) * 1.5).rgb;
-	vec3 col4 = texture(tex, texCo + vec2(texStep.x, texStep.y) * 1.5).rgb;
+	vec3 col1 = textureLod(tex, texCo + vec2(-texStep.x, -texStep.y) * 1.5, 0.0).rgb;
+	vec3 col2 = textureLod(tex, texCo + vec2(texStep.x, -texStep.y) * 1.5, 0.0).rgb;
+	vec3 col3 = textureLod(tex, texCo + vec2(-texStep.x, texStep.y) * 1.5, 0.0).rgb;
+	vec3 col4 = textureLod(tex, texCo + vec2(texStep.x, texStep.y) * 1.5, 0.0).rgb;
 	vec3 colavg = (col1 + col2 + col3 + col4) * 0.25;
-
-	#ifdef _CPPV
-		fragColor.rgb += (fragColor.rgb - colavg) * sharpenPower;
-	#else
-		fragColor.rgb += (fragColor.rgb - colavg) * compoSharpenStrength;
-	#endif
+	fragColor.rgb += (fragColor.rgb - colavg) * compoSharpenStrength;
 #endif
 
 #ifdef _CFog
@@ -310,7 +305,7 @@ void main() {
 		vec4 lndc = VP * vec4(light, 1.0);
 		lndc.xy /= lndc.w;
 		vec2 lss = lndc.xy * 0.5 + 0.5;
-		float lssdepth = linearize(texture(gbufferD, lss).r * 2.0 - 1.0, cameraProj);
+		float lssdepth = linearize(textureLod(gbufferD, lss, 0.0).r * 2.0 - 1.0, cameraProj);
 		float lightDistance = distance(eye, light);
 		if (lightDistance <= lssdepth) {
 			vec2 lensuv = texCo * 2.0 - 1.0;
@@ -324,29 +319,31 @@ void main() {
 #ifdef _CGrain
 	// const float compoGrainStrength = 4.0;
 	float x = (texCo.x + 4.0) * (texCo.y + 4.0) * (time * 10.0);
-
-	#ifdef _CPPV
-		fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * filmGrainPPV;
-	#else
-		fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * compoGrainStrength;
-	#endif
+	fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * compoGrainStrength;
 #endif
 	
+#ifdef _CGrainStatic
+	float x = (texCo.x + 4.0) * (texCo.y + 4.0) * 10.0;
+	fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * 0.09;
+#endif
+
 #ifdef _CVignette
 	fragColor.rgb *= vignette();
 #endif
 
 #ifdef _CExposure
-		fragColor.rgb *= compoExposureStrength;
+	fragColor.rgb *= compoExposureStrength;
 #endif
 
 #ifdef _CPPV
-	fragColor.rgb *= globalExposure.x;
+	fragColor.rgb *= ComputeEV(0.0);
 #endif
 
 #ifdef _AutoExposure
-	vec3 expo = textureLod(tex, vec2(0,0), 100).rgb;
-	fragColor.rgb *= vec3(1.0) - min(expo, vec3(autoExposureStrength));
+	//vec3 expo = textureLod(tex, vec2(0,0), 100).rgb;
+	//fragColor.rgb *= vec3(1.0) - min(expo, vec3(autoExposureStrength));
+	ComputeEV = textureLod(tex, vec2(0,0), 100).rgb;
+	fragColor.rgb *= ComputeEV;
 #endif
 #ifdef _Hist // Auto-exposure
 	if (texCoord.x < 0.1) fragColor.rgb = textureLod(histogram, vec2(0, 0), 9.0).rrr; // 512x512
@@ -409,17 +406,6 @@ void main() {
 	// fragColor.rgb += compoBrightness;
 // #endif
 
-#ifdef _CLensTex
-	//fragColor.rgb += texture(lensTexture, texCo).rgb;
-	vec4 scratches = texture(lensTexture, texCo);
-	vec3 scratchBlend = fragColor.rgb + scratches.rgb;
-	float center = smoothstep(0.0, 0.5, length(texCo - 0.5));
-	float luminance = dot(fragColor.rgb, vec3(0.299, 0.587, 0.114));
-	float brightnessMap = smoothstep(0.1, 0.4, luminance * center);
-	fragColor.rgb = clamp(mix(fragColor.rgb, scratchBlend, brightnessMap * 0.75), 0, 1);
-
-#endif
-
 #ifdef _CPPV
 	//Global Values
 		//fragColor.rgb = WhiteBalance(fragColor.rgb, 7500, time);
@@ -478,27 +464,21 @@ void main() {
 
 		//Tint
 		fragColor.rgb *= vec3(globalTint.r,globalTint.g,globalTint.b);
+#endif
 
+#ifdef _CLensTex
+	fragColor.rgb += textureLod(lensTexture, texCo, 0.0).rgb;
+#endif
+
+#ifdef _CLetterbox
+	// const float compoLetterboxSize = 0.1;
+	fragColor.rgb *= 1.0 - step(0.5 - compoLetterboxSize, abs(0.5 - texCo.y));
 #endif
 
 //3D LUT Implementation from GPUGems 2 by Nvidia
 //https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter24.html
 
 #ifdef _CLUT
-	#ifdef _CPPV
-		fragColor = mix(fragColor,LUTlookup(fragColor, lutTexture),lutPowerPPV);
-	#else
-		fragColor = LUTlookup(fragColor, lutTexture);
-	#endif
+	fragColor = LUTlookup(fragColor, lutTexture);
 #endif
-
-#ifdef _CLetterbox
-	// const float compoLetterboxSize = 0.1;
-	#ifdef _CPPV
-		fragColor.rgb *= 1.0 - step(0.5 - letterboxRatioPPV, abs(0.5 - texCo.y));
-	#else
-		fragColor.rgb *= 1.0 - step(0.5 - compoLetterboxSize, abs(0.5 - texCo.y));
-	#endif
-#endif
-
 }
