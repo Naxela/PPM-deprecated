@@ -54,7 +54,7 @@ class PPM {
 
 		//TODO! CALIBRATE DEFAULT VALUES
 		//TODO! RENAME TO CAMERA Uniforms
-	public static var compositor_uniforms = [
+	public static var camera_uniforms = [
 		1.0,				//0: Camera: F-Number
 		2.8333,				//1: Camera: Shutter time
 		100.0, 				//2: Camera: ISO
@@ -243,52 +243,29 @@ class PPM {
 
 		if (link == "_PPMComp1") {
 			m = iron.object.Uniforms.helpMat;
-			m._00 = compositor_uniforms[0];
-			m._01 = compositor_uniforms[1];
-			m._02 = compositor_uniforms[2];
-			m._03 = compositor_uniforms[3];
+			m._00 = camera_uniforms[0];
+			m._01 = camera_uniforms[1];
+			m._02 = camera_uniforms[2];
+			m._03 = camera_uniforms[3];
 
-			m._10 = compositor_uniforms[4];
-			m._11 = compositor_uniforms[5];
-			m._12 = compositor_uniforms[6];
-			m._13 = compositor_uniforms[7];
+			m._10 = camera_uniforms[4];
+			m._11 = camera_uniforms[5];
+			m._12 = camera_uniforms[6];
+			m._13 = camera_uniforms[7];
 
-			m._20 = compositor_uniforms[8];
-			m._21 = compositor_uniforms[5];
-			m._22 = compositor_uniforms[6];
-			m._23 = compositor_uniforms[7];
+			m._20 = camera_uniforms[8];
+			m._21 = camera_uniforms[5];
+			m._22 = camera_uniforms[6];
+			m._23 = camera_uniforms[7];
 		}
 
 		return m;
 
 	}
 
-
-	/*
-	public static function externalFloatLink(object:Object, mat:MaterialData, link:String):Float {
-		
-		if(link == "_compFNumber") {
-			v = compositor_uniforms[0];
-		}
-		if(link == "_compShutterTime") {
-			v = compositor_uniforms[1];
-		}
-		if(link == "_compISO") {
-			v = compositor_uniforms[2];
-		}
-		if(link == "_compExposureCompensation") {
-			v = compositor_uniforms[3];
-		}
-		
-		return v;
-	}
-	*/
-
     public static function init() {
         iron.object.Uniforms.externalVec3Links = [externalVec3Link];
 		iron.object.Uniforms.externalMat4Links = [externalMat4Link];
-
-		//iron.object.Uniforms.externalFloatLinks = [externalFloatLink];
 		iron.App.notifyOnUpdate(OnUpdate);
     }
 
