@@ -54,6 +54,9 @@ uniform vec3 highlightContrast;
 uniform vec3 highlightGamma;
 uniform vec3 highlightGain;
 uniform vec3 highlightOffset;
+
+uniform mat4 PPMComp1;
+
 #endif
 
 #ifdef _CGlare
@@ -109,16 +112,16 @@ float ComputeEV100(const float aperture2, const float shutterTime, const float I
     return log2(aperture2 / shutterTime * 100.0 / ISO);
 }
 float ConvertEV100ToExposure(float EV100) {
-    return 0.833333 * exp2(-EV100);
+    //return 0.833333 * exp2(-EV100);
+	return exp2(-EV100);
 }
 float ComputeEV(float avgLuminance) {
-    const float aperture  = globalExposure.x;
-    const float aperture2 = aperture * aperture;
-    const float shutterTime = 1.0 / globalExposure.y;
-    const float ISO = globalExposure.z;
-    const float EC = 1.0;
+    const float sqAperture = PPMComp1[0].x * PPMComp1[0].x;
+    const float shutterTime = 1.0 / PPMComp1[0].y;
+    const float ISO = PPMComp1[0].z;
+    const float EC = PPMComp1[0].w;
 
-    float EV100 = ComputeEV100(aperture2, shutterTime, ISO);
+    float EV100 = ComputeEV100(sqAperture, shutterTime, ISO);
 
     return ConvertEV100ToExposure(EV100 - EC) * PI;
 }
@@ -202,7 +205,11 @@ void main() {
 #endif
 
 #ifdef _CFishEye
-	const float fishEyeStrength = -0.01;
+	#ifdef _CPPM
+		const float fishEyeStrength = -(PPMComp1[1].x);
+	#else
+		const float fishEyeStrength = -0.01;
+	#endif
 	const vec2 m = vec2(0.5, 0.5);
 	vec2 d = texCo - m;
 	float r = sqrt(dot(d, d));
@@ -273,7 +280,23 @@ void main() {
 #else
 	
 	#ifdef _CDOF
-	fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj);
+		#ifdef _CPPM
+
+			bool compoAutoFocus = false;
+			float compoDistance = PPMComp1[1].z;
+			float compoLength = PPMComp1[1].w;
+			float compoStop = PPMComp1[2].x;
+
+			if (PPMComp1[1].y == 1){
+				compoAutoFocus = true;
+			} else {
+				compoAutoFocus = false;
+			}
+
+			fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, compoAutoFocus, compoDistance, compoLength, compoStop);
+		#else
+			fragColor.rgb = dof(texCo, depth, tex, gbufferD, texStep, cameraProj, true, compoDOFDistance, compoDOFLength, compoDOFFstop);
+		#endif
 	#else
 	fragColor.rgb = textureLod(tex, texCo, 0.0).rgb;
 	#endif
@@ -336,7 +359,7 @@ void main() {
 #endif
 
 #ifdef _CPPM
-	//fragColor.rgb *= ComputeEV(0.0);
+	fragColor.rgb *= ComputeEV(0.0);
 #endif
 
 #ifdef _AutoExposure

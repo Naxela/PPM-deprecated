@@ -190,6 +190,11 @@
 					"name": "highlightOffset",
 					"link": "_highlightOffset",
 					"ifdef": ["_CPPM"]
+				},
+				{
+					"name": "PPMComp1",
+					"link": "_PPMComp1",
+					"ifdef": ["_CPPM"]
 				}
 			],
 			"texture_params": [],
