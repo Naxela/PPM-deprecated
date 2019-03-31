@@ -24,10 +24,10 @@ def set_data(self, context):
         data = myfile.read().replace('\n', '').replace('"','')
         self.property1 = data
 
-class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
-    '''Colorgrading Global node'''
-    bl_idname = 'LNColorgradingGlobalNode'
-    bl_label = 'Colorgrading Global'
+class ColorgradingSetMidtoneNode(Node, ArmLogicTreeNode):
+    '''Colorgrading Set Midtone node'''
+    bl_idname = 'LNColorgradingSetMidtoneNode'
+    bl_label = 'Colorgrading Set Midtone'
     bl_icon = 'QUESTION'
 
     # TODO: RRESET FILE OPTION FOR THE BELOW
@@ -40,10 +40,6 @@ class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
     
 
     def draw_nodes_uniform(self, context):
-        self.inputs.new('NodeSocketFloat', 'Whitebalance')
-        self.inputs[-1].default_value = 6500.0
-        self.inputs.new('NodeSocketColor', 'Tint')
-        self.inputs[-1].default_value = [1.0, 1.0, 1.0, 1.0]
         self.inputs.new('NodeSocketFloat', 'Saturation')
         self.inputs[-1].default_value = 1
         self.inputs.new('NodeSocketFloat', 'Contrast')
@@ -56,8 +52,6 @@ class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
         self.inputs[-1].default_value = 1
 
     def draw_nodes_rgb(self, context):
-        self.inputs.new('NodeSocketFloat', 'Whitebalance')
-        self.inputs[-1].default_value = 6500.0
         self.inputs.new('NodeSocketVector', 'Tint')
         self.inputs[-1].default_value = [1,1,1]
         self.inputs.new('NodeSocketVector', 'Saturation')
@@ -86,4 +80,4 @@ class ColorgradingGlobalNode(Node, ArmLogicTreeNode):
             layout.prop(self, 'filepath')
             layout.prop(self, 'property1')
 
-add_node(ColorgradingGlobalNode, category='PPM')
+add_node(ColorgradingSetMidtoneNode, category='PPM')

@@ -24,10 +24,10 @@ def set_data(self, context):
         data = myfile.read().replace('\n', '').replace('"','')
         self.property1 = data
 
-class ColorgradingShadowNode(Node, ArmLogicTreeNode):
-    '''Colorgrading Shadow node'''
-    bl_idname = 'LNColorgradingShadowNode'
-    bl_label = 'Colorgrading Shadow'
+class ColorgradingSetHighlightNode(Node, ArmLogicTreeNode):
+    '''Colorgrading Set Highlight node'''
+    bl_idname = 'LNColorgradingSetHighlightNode'
+    bl_label = 'Colorgrading Set Highlight'
     bl_icon = 'QUESTION'
 
     # TODO: RRESET FILE OPTION FOR THE BELOW
@@ -40,8 +40,8 @@ class ColorgradingShadowNode(Node, ArmLogicTreeNode):
     
 
     def draw_nodes_uniform(self, context):
-        self.inputs.new('NodeSocketFloat', 'ShadowMax')
-        self.inputs[-1].default_value = 1
+        self.inputs.new('NodeSocketFloat', 'HighlightMin')
+        self.inputs[-1].default_value = 0
         self.inputs.new('NodeSocketFloat', 'Saturation')
         self.inputs[-1].default_value = 1
         self.inputs.new('NodeSocketFloat', 'Contrast')
@@ -54,8 +54,8 @@ class ColorgradingShadowNode(Node, ArmLogicTreeNode):
         self.inputs[-1].default_value = 1
 
     def draw_nodes_rgb(self, context):
-        self.inputs.new('NodeSocketFloat', 'ShadowMax')
-        self.inputs[-1].default_value = 1
+        self.inputs.new('NodeSocketFloat', 'HighlightMin')
+        self.inputs[-1].default_value = 0
         self.inputs.new('NodeSocketVector', 'Saturation')
         self.inputs[-1].default_value = [1,1,1]
         self.inputs.new('NodeSocketVector', 'Contrast')
@@ -82,4 +82,4 @@ class ColorgradingShadowNode(Node, ArmLogicTreeNode):
             layout.prop(self, 'filepath')
             layout.prop(self, 'property1')
 
-add_node(ColorgradingShadowNode, category='PPM')
+add_node(ColorgradingSetHighlightNode, category='PPM')

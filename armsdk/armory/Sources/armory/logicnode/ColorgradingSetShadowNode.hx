@@ -1,6 +1,6 @@
 package armory.logicnode;
 
-class ColorgradingMidtoneNode extends LogicNode {
+class ColorgradingSetShadowNode extends LogicNode {
 
     public var property0:Dynamic;
     public var property1:Dynamic;
@@ -24,20 +24,24 @@ class ColorgradingMidtoneNode extends LogicNode {
 
         if(property0 == "Uniform"){
 
-            for (i in 0...4){
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][0] = inputs[i+2].get();
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][1] = inputs[i+2].get();
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][2] = inputs[i+2].get();
+            armory.renderpath.PPM.colorgrading_global_uniforms[0][1] = inputs[1].get();
+
+            for (i in 0...5){
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get();
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get();
             }
+
+            //trace(inputs[6].get());
 
         } else if (property0 == "RGB") {
 
-            armory.renderpath.PPV.colorgrading_highlight_uniforms[0][0] = inputs[1].get();
+            armory.renderpath.PPM.colorgrading_global_uniforms[0][2] = inputs[1].get();
 
-            for (i in 0...4){
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][0] = inputs[i+1].get().x;
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][1] = inputs[i+1].get().y;
-                armory.renderpath.PPM.colorgrading_midtone_uniforms[i][2] = inputs[i+1].get().z;
+            for (i in 0...5){
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][0] = inputs[i+2].get().x;
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][1] = inputs[i+2].get().y;
+                armory.renderpath.PPM.colorgrading_shadow_uniforms[i][2] = inputs[i+2].get().z;
             }
 
         } else if (property0 == "Preset File") {
