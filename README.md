@@ -3,7 +3,12 @@
 ## Post-Processing Module
 Post-Processing Module (Formerly Post-Processing Volumes) is an addon for Armory3D that implements realtime colorgrading and implements both existing and new shaders as uniforms that can be fully controlled both through Haxe and through Logic Nodes.
 
-## Version 0.1:
+## Version 0.2 [Download: https://github.com/Naxela/PPM/archive/0.2.zip]:
+- Version 0.2 continues to improve the colorgrading and add more nodes. The colorgrading nodes have been organized in Get and Set nodes for easier data application and retrieval. The first auxiliary node have been added in the form of a lerp float node, that allows for easier timed transitions. Version is compatible with Armory 0.6
+
+![](img/nodes2.png)
+
+## Version 0.1 [Download: https://github.com/Naxela/PPM/archive/0.1.zip]:
 - Version 0.1 is the first version after refactoring, that implements fully working colorgrading for all luminance intensities, as well as per color channel selection. I intend to be more structured with this addon than I was earlier, as such a lot of realtime uniforms and shaders have been removed temporarily. They will be added gradually. For the old code, please refer to the commit history caches. Version is compatible with Armory 0.6
 
 ![](img/nodes.png)
@@ -11,9 +16,11 @@ Post-Processing Module (Formerly Post-Processing Volumes) is an addon for Armory
 A selection of the currently available nodes.
 
 ## Why as an addon?
-I'd rather not commit something to Armory that is still bugged and not as optimized as possible. Still lots of things to do to make it useful. This is compatible with the Armory 0.6 version - This addon might break Armory. Bugs should be reported on this github section rather than the main Armory repo.
+I'd rather not commit something to Armory that is still bugged, incomplete and not as optimized as possible. Still lots of things to do to make it useful. This is compatible with the Armory 0.6 version - This addon might break Armory. Bugs should be reported on this github section rather than the main Armory repo.
 
 ## How to - Installation
+
+Get the latest release from the release section here on Github: https://github.com/Naxela/PPM/archive/0.2.zip
 
 Simply copy and paste the **armsdk** folder directly into your Armory/Blender main folder and it will expose and implement the controls straight away. In order to include the uniforms and include the shader code, toggle on "PPM" in the renderpath.
 
