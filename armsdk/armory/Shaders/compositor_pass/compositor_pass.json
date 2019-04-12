@@ -112,11 +112,6 @@
 					"ifdef": ["_CPPM"]
 				},
 				{
-					"name": "globalExposure",
-					"link": "_globalExposure",
-					"ifdef": ["_CPPM"]
-				},
-				{
 					"name": "shadowSaturation",
 					"link": "_shadowSaturation",
 					"ifdef": ["_CPPM"]

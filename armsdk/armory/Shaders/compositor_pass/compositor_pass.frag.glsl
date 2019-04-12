@@ -35,7 +35,6 @@ uniform vec3 globalContrast;
 uniform vec3 globalGamma;
 uniform vec3 globalGain;
 uniform vec3 globalOffset;
-uniform vec3 globalExposure;
 
 uniform vec3 shadowSaturation;
 uniform vec3 shadowContrast;
@@ -106,6 +105,8 @@ vec3 applyFog(vec3 rgb, float distance) {
 	return mix(rgb, compoFogColor, fogAmount);
 }
 #endif
+
+
 
 #ifdef _CPPM
 float ComputeEV100(const float aperture2, const float shutterTime, const float ISO) {
@@ -395,25 +396,85 @@ void main() {
 	// float clampedLuminace = clamp(unclampedLuminance, minBrightness, maxBrightness);
 #endif
 
-#ifdef _CToneFilmic
-	fragColor.rgb = tonemapFilmic(fragColor.rgb); // With gamma
+#ifdef _CPPM
+	if(PPMComp1[2].y == 0){ //Filmic 1
+		fragColor.rgb = tonemapFilmic(fragColor.rgb); // With gamma
+	} else if (PPMComp1[2].y == 1){ //Filmic 2
+		fragColor.rgb = acesFilm(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	} else if (PPMComp1[2].y == 2){ //Reinhard
+		fragColor.rgb = tonemapReinhard(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	} else if (PPMComp1[2].y == 3){ //Uncharted2
+		fragColor.rgb = tonemapUncharted2(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
+		fragColor.rgb = clamp(fragColor.rgb, 0.0, 1.0);
+	} else if (PPMComp1[2].y == 4){ //None
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
+	} else if (PPMComp1[2].y == 5){ //Raw
+		fragColor.rgb = fragColor.rgb;
+	} else if (PPMComp1[2].y == 6){ //HDP
+		//vec3 x = max(0, fragColor.rgb - 0.004);
+		//fragColor.rgb = (x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06);
+		fragColor.rgb = vec3(0,1,0); //ERROR
+	} else if (PPMComp1[2].y == 7){ //Raw
+		vec4 vh = vec4(fragColor.rgb, 1);
+		vec4 va = (1.425 * vh) + 0.05;
+		vec4 vf = ((vh * va + 0.004) / ((vh * (va + 0.55) + 0.0491))) - 0.0821;
+		fragColor.rgb = vf.rgb / vf.www; 
+	} else if (PPMComp1[2].y == 8){ //Raw
+		fragColor.rgb = vec3(0,1,0); //ERROR
+	} else if (PPMComp1[2].y == 9){ //False Colors
+
+		vec4 c = vec4(fragColor.r,fragColor.g,fragColor.b,0); //Linear without gamma
+
+		vec3 luminanceVector = vec3(0.2125, 0.7154, 0.0721); //Relative Luminance Vector
+		float luminance = dot(luminanceVector, c.xyz);
+
+		vec3 maxLumColor = vec3(1,0,0); //High values (> 1.0)
+		//float maxLum = 2.0; Needs to read the highest pixel, but I don't know how to yet
+		//Probably easier with a histogram too, once it's it in place
+
+		vec3 midLumColor = vec3(0,1,0); //Mid values (< 1.0)
+		float midLum = 1.0;
+
+		vec3 minLumColor = vec3(0,0,1); //Low values (< 1.0)
+		float minLum = 0.0;
+
+		if(luminance < midLum){
+			fragColor.rgb = mix(minLumColor, midLumColor, luminance);
+		} else {
+			fragColor.rgb = mix(midLumColor, maxLumColor, luminance);
+		}
+		
+	} else {
+		fragColor.rgb = vec3(0,1,0); //ERROR
+	}
+
+
+
+#else
+	#ifdef _CToneFilmic
+		fragColor.rgb = tonemapFilmic(fragColor.rgb); // With gamma
+	#endif
+	#ifdef _CToneFilmic2
+		fragColor.rgb = acesFilm(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	#endif
+	#ifdef _CToneReinhard
+		fragColor.rgb = tonemapReinhard(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
+	#endif
+	#ifdef _CToneUncharted
+		fragColor.rgb = tonemapUncharted2(fragColor.rgb);
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
+		fragColor.rgb = clamp(fragColor.rgb, 0.0, 2.2);
+	#endif
+	#ifdef _CToneNone
+		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
+	#endif
 #endif
-#ifdef _CToneFilmic2
-	fragColor.rgb = acesFilm(fragColor.rgb);
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
-#endif
-#ifdef _CToneReinhard
-	fragColor.rgb = tonemapReinhard(fragColor.rgb);
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2));
-#endif
-#ifdef _CToneUncharted
-	fragColor.rgb = tonemapUncharted2(fragColor.rgb);
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
-#endif
-#ifdef _CToneNone
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
-#endif
-	
+
 #ifdef _CBW
 	// fragColor.rgb = vec3(clamp(dot(fragColor.rgb, fragColor.rgb), 0.0, 1.0));
 	fragColor.rgb = vec3((fragColor.r * 0.3 + fragColor.g * 0.59 + fragColor.b * 0.11) / 3.0) * 2.5;

@@ -63,7 +63,8 @@ class PPM {
 		1,					//5: DoF AutoFocus §§ If true, it ignores the DoF Distance setting
 		10.0,				//6: DoF Distance
 		160.0,				//7: DoF Focal Length mm
-		128					//8: DoF F-Stop
+		128,				//8: DoF F-Stop
+		0,					//9: Tonemapping Method
 							//x: Fisheye Distortion
 							//x: 
 	];
@@ -254,9 +255,7 @@ class PPM {
 			m._13 = camera_uniforms[7];
 
 			m._20 = camera_uniforms[8];
-			m._21 = camera_uniforms[5];
-			m._22 = camera_uniforms[6];
-			m._23 = camera_uniforms[7];
+			m._21 = Std.int(camera_uniforms[9]);
 		}
 
 		return m;

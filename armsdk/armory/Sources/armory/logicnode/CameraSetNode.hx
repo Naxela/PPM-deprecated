@@ -17,6 +17,7 @@ class CameraSetNode extends LogicNode {
 		armory.renderpath.PPM.camera_uniforms[6] = inputs[7].get();
 		armory.renderpath.PPM.camera_uniforms[7] = inputs[8].get();
 		armory.renderpath.PPM.camera_uniforms[8] = inputs[9].get();
+		armory.renderpath.PPM.camera_uniforms[9] = inputs[10].get();
 
 		runOutput(0);
 	}
