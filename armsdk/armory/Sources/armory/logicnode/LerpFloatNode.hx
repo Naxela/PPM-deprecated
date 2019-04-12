@@ -37,10 +37,17 @@ class LerpFloatNode extends LogicNode {
 
 		if (abo) {
 			t = 0;
+			//trace("A");
 		}
 
 		if (v1==null) {
-			return v;
+			//trace("B");
+			if(from == 0){
+				return v;
+			} else {
+				return false;
+			}
+
 			c=1;
 		}
 
@@ -49,13 +56,33 @@ class LerpFloatNode extends LogicNode {
 			t -= iron.system.Time.delta;
 			c++;
 			if(v > v2){
-				return v2;
+
+				if(from == 0){
+					//trace("C");
+					return v;
+				} else {
+					return true;
+				}
+
 			} else {
-				return fixedFloat(v);
+				if(from == 0){
+					//trace("D");
+					return fixedFloat(v);
+				} else {
+					return true;
+				}
+				
 			}
 		} else {
 			c = 1;
-			return fixedFloat(v);
+
+			if(from == 0){
+				//trace("E");
+				return fixedFloat(v);
+			} else {
+				return false;
+			}
+
 		}
 
 
