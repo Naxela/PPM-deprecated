@@ -29,6 +29,8 @@ class CameraSetNode(Node, ArmLogicTreeNode):
         self.inputs[-1].default_value = 160.0
         self.inputs.new('NodeSocketFloat', 'DoF F-Stop')
         self.inputs[-1].default_value = 128.0
+        self.inputs.new('NodeSocketInt', 'Tonemapper')
+        self.inputs[-1].default_value = 0.0
 
         #self.inputs.new('NodeSocketFloat', 'Letterbox')
         #self.inputs.new('NodeSocketFloat', 'Sharpen')
@@ -38,5 +40,6 @@ class CameraSetNode(Node, ArmLogicTreeNode):
         #self.inputs.new('NodeSocketFloat', 'Bloom Threshold')
         #self.inputs.new('NodeSocketFloat', 'Bloom Strength')
         #self.inputs.new('NodeSocketFloat', 'Bloom Radius')
+        self.outputs.new('ArmNodeSocketAction', 'Out')
 
 add_node(CameraSetNode, category='PPM')
