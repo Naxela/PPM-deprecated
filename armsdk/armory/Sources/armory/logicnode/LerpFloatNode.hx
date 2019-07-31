@@ -29,7 +29,7 @@ class LerpFloatNode extends LogicNode {
 		f = 0.0;
 		c = 1.0;
 		
-		f = (t / iron.system.Time.delta); //The amount of steps v1 makes towards becoming v2 ;)
+		f = (t / iron.system.Time.delta); //?
 	}
 
 	override function get(from:Int):Dynamic {

@@ -15,6 +15,9 @@ def add_world_defs():
     if rpdat.arm_ssrs:
         wrd.world_defs += '_SSRS'
 
+    if rpdat.arm_micro_shadowing:
+        wrd.world_defs += '_MicroShadowing'
+
     if rpdat.arm_two_sided_area_light:
         wrd.world_defs += '_TwoSidedAreaLight'
 
@@ -34,24 +37,12 @@ def add_world_defs():
         assets.add_khafile_def('arm_deferred')
         wrd.world_defs += '_Deferred'
 
-    # GI
-    voxelgi = False
-    voxelao = False
-    has_voxels = arm.utils.voxel_support()
-    if has_voxels and rpdat.arm_material_model == 'Full':
-        if rpdat.rp_gi == 'Voxel GI':
-            voxelgi = True
-        elif rpdat.rp_gi == 'Voxel AO':
-            voxelao = True
     # Shadows
     if rpdat.rp_shadows:
         wrd.world_defs += '_ShadowMap'
         if rpdat.rp_shadowmap_cascades != '1':
-            if voxelgi:
-                log.warn('Disabling shadow cascades - Voxel GI does not support cascades yet')
-            else:
-                wrd.world_defs += '_CSM'
-                assets.add_khafile_def('arm_csm')
+            wrd.world_defs += '_CSM'
+            assets.add_khafile_def('arm_csm')
     # SS
     if rpdat.rp_ssgi == 'RTGI' or rpdat.rp_ssgi == 'RTAO':
         if rpdat.rp_ssgi == 'RTGI':
@@ -61,8 +52,8 @@ def add_world_defs():
     if rpdat.rp_autoexposure:
         wrd.world_defs += '_AutoExposure'
 
-    if voxelgi or voxelao:
-        assets.add_khafile_def('arm_voxelgi')
+    has_voxels = arm.utils.voxel_support()
+    if rpdat.rp_voxelao and has_voxels and rpdat.arm_material_model == 'Full':
         wrd.world_defs += '_VoxelCones' + rpdat.arm_voxelgi_cones
         if rpdat.arm_voxelgi_revoxelize:
             assets.add_khafile_def('arm_voxelgi_revox')
@@ -71,21 +62,11 @@ def add_world_defs():
             if rpdat.arm_voxelgi_temporal:
                 assets.add_khafile_def('arm_voxelgi_temporal')
                 wrd.world_defs += '_VoxelGITemporal'
-
-        if voxelgi:
-            wrd.world_defs += '_VoxelGI'
-            # assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_light/voxel_light.comp.glsl')
-            # if rpdat.arm_voxelgi_bounces != "1":
-            #     assets.add_khafile_def('rp_gi_bounces={0}'.format(rpdat.arm_voxelgi_bounces))
-            #     assets.add_shader_external(arm.utils.get_sdk_path() + '/armory/Shaders/voxel_bounce/voxel_bounce.comp.glsl')
-            if rpdat.rp_voxelgi_relight:
-                assets.add_khafile_def('rp_voxelgi_relight')
-        elif voxelao:
-            wrd.world_defs += '_VoxelAOvar' # Write a shader variant
-            if rpdat.arm_voxelgi_shadows:
-                wrd.world_defs += '_VoxelShadow'
-            if rpdat.arm_voxelgi_occ == 0.0:
-                wrd.world_defs += '_VoxelAONoTrace'
+        wrd.world_defs += '_VoxelAOvar' # Write a shader variant
+        if rpdat.arm_voxelgi_shadows:
+            wrd.world_defs += '_VoxelShadow'
+        if rpdat.arm_voxelgi_occ == 0.0:
+            wrd.world_defs += '_VoxelAONoTrace'
 
     if arm.utils.get_legacy_shaders() or 'ios' in state.target:
         wrd.world_defs += '_Legacy'
@@ -114,7 +95,7 @@ def add_world_defs():
         wrd.world_defs += '_Clusters'
         assets.add_khafile_def('arm_clusters')
 
-    if '_Rad' in wrd.world_defs or '_VoxelGI' in wrd.world_defs:
+    if '_Rad' in wrd.world_defs and '_Brdf' not in wrd.world_defs:
         wrd.world_defs += '_Brdf'
 
 def build():
@@ -150,8 +131,12 @@ def build():
     if rpdat.rp_background == 'World':
         assets.add_shader_pass('world_pass')
         if '_EnvClouds' in wrd.world_defs:
-            assets.add(assets_path + 'noise256.png')
-            assets.add_embedded_data('noise256.png')
+            assets.add(assets_path + 'clouds_base.raw')
+            assets.add_embedded_data('clouds_base.raw')
+            assets.add(assets_path + 'clouds_detail.raw')
+            assets.add_embedded_data('clouds_detail.raw')
+            assets.add(assets_path + 'clouds_map.png')
+            assets.add_embedded_data('clouds_map.png')
 
     if rpdat.rp_renderer == 'Deferred' and not rpdat.rp_compositornodes:
         assets.add_shader_pass('copy_pass')
@@ -175,12 +160,22 @@ def build():
                 wrd.compo_defs += '_CGrain'
             if rpdat.arm_sharpen:
                 wrd.compo_defs += '_CSharpen'
-            if bpy.data.scenes[0].cycles.film_exposure != 1.0:
+            if bpy.data.scenes[0].view_settings.exposure != 0.0:
                 wrd.compo_defs += '_CExposure'
             if rpdat.arm_fog:
                 wrd.compo_defs += '_CFog'
                 compo_depth = True
-            if len(bpy.data.cameras) > 0 and bpy.data.cameras[0].dof_distance > 0.0:
+
+            focus_distance = 0.0 # TODO: deprecated
+            if len(bpy.data.cameras) > 0:
+                cam = bpy.data.cameras[0]
+                if hasattr(cam, 'dof'):
+                    if cam.dof.use_dof:
+                        focus_distance = cam.dof.focus_distance
+                else:
+                    focus_distance = cam.dof_distance
+
+            if len(bpy.data.cameras) > 0 and focus_distance > 0.0:
                 wrd.compo_defs += '_CDOF'
                 compo_depth = True
             if compo_depth:
@@ -267,23 +262,12 @@ def build():
         assets.add_khafile_def('rp_stereo')
         assets.add_khafile_def('arm_vr')
         wrd.world_defs += '_VR'
-        assets.add(assets_path + 'vr.png')
-        assets.add_embedded_data('vr.png')
 
-    rp_gi = rpdat.rp_gi
     has_voxels = arm.utils.voxel_support()
-    if not has_voxels or rpdat.arm_material_model != 'Full':
-        rp_gi = 'Off'
-    assets.add_khafile_def('rp_gi={0}'.format(rp_gi))
-    if rp_gi != 'Off':
-        if has_voxels:
-            assets.add_khafile_def('rp_gi={0}'.format(rp_gi))        
-            assets.add_khafile_def('rp_voxelgi_resolution={0}'.format(rpdat.rp_voxelgi_resolution))
-            assets.add_khafile_def('rp_voxelgi_resolution_z={0}'.format(rpdat.rp_voxelgi_resolution_z))
-            # if rpdat.arm_voxelgi_shadows:
-                # assets.add_khafile_def('rp_voxelgi_shadows')
-        else:
-            log.warn('Disabling Voxel GI - unsupported target - use Krom instead')
+    if rpdat.rp_voxelao and has_voxels and rpdat.arm_material_model == 'Full':
+        assets.add_khafile_def('rp_voxelao')
+        assets.add_khafile_def('rp_voxelgi_resolution={0}'.format(rpdat.rp_voxelgi_resolution))
+        assets.add_khafile_def('rp_voxelgi_resolution_z={0}'.format(rpdat.rp_voxelgi_resolution_z))
 
     if rpdat.arm_rp_resolution == 'Custom':
         assets.add_khafile_def('rp_resolution_filter={0}'.format(rpdat.arm_rp_resolution_filter))
@@ -295,7 +279,7 @@ def build():
             assets.add_shader_pass('deferred_light_' + rpdat.arm_material_model.lower())
             assets.add_khafile_def('rp_material_' + rpdat.arm_material_model.lower())
     
-    if bpy.app.version >= (2, 80, 1) and len(bpy.data.lightprobes) > 0:
+    if len(bpy.data.lightprobes) > 0:
         wrd.world_defs += '_Probes'
         assets.add_khafile_def('rp_probes')
         assets.add_shader_pass('probe_planar')
@@ -313,9 +297,16 @@ def build():
     if rpdat.rp_decals:
         assets.add_khafile_def('rp_decals')
 
-    if rpdat.rp_ocean:
-        assets.add_khafile_def('rp_ocean')
+    if rpdat.rp_water:
+        assets.add_khafile_def('rp_water')
         assets.add_shader_pass('water_pass')
+        assets.add_shader_pass('copy_pass')
+        assets.add(assets_path + 'water_base.png')
+        assets.add_embedded_data('water_base.png')
+        assets.add(assets_path + 'water_detail.png')
+        assets.add_embedded_data('water_detail.png')
+        assets.add(assets_path + 'water_foam.png')
+        assets.add_embedded_data('water_foam.png')
 
     if rpdat.rp_blending:
         assets.add_khafile_def('rp_blending')
@@ -338,24 +329,13 @@ def build():
 
     if rpdat.rp_compositornodes and rpdat.rp_autoexposure:
         assets.add_khafile_def('rp_autoexposure')
+        assets.add_shader_pass('histogram_pass')
 
     if rpdat.rp_dynres:
         assets.add_khafile_def('rp_dynres')
 
     if rpdat.rp_ppm:
         assets.add_khafile_def('rp_ppm')
-
-    # if rpdat.arm_soft_shadows == 'On':
-    #     if rpdat.rp_shadowmap_cascades == '1':
-    #         assets.add_shader_pass('dilate_pass')
-    #         assets.add_shader_pass('visibility_pass')
-    #         assets.add_shader_pass('blur_shadow_pass')
-    #         assets.add_khafile_def('rp_soft_shadows')
-    #         wrd.world_defs += '_SoftShadows'
-    #         if rpdat.arm_soft_shadows_penumbra != 1:
-    #             wrd.world_defs += '_PenumbraScale'
-    #     else:
-    #         log.warn('Disabling soft shadows - "Armory Render Path - Cascades" requires to be set to 1 for now')
 
     gbuffer2 = '_Veloc' in wrd.world_defs
     if gbuffer2:

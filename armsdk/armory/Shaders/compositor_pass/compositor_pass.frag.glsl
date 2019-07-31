@@ -23,7 +23,7 @@ uniform sampler2D lensTexture;
 uniform sampler2D lutTexture;
 #endif
 
-#ifdef _Hist
+#ifdef _AutoExposure
 uniform sampler2D histogram;
 #endif
 
@@ -57,6 +57,11 @@ uniform vec3 highlightOffset;
 uniform mat4 PPMComp1;
 
 #endif
+
+// #ifdef _CPos
+// uniform vec3 eye;
+// uniform vec3 eyeLook;
+// #endif
 
 #ifdef _CGlare
 uniform vec3 light;
@@ -106,8 +111,6 @@ vec3 applyFog(vec3 rgb, float distance) {
 }
 #endif
 
-
-
 #ifdef _CPPM
 float ComputeEV100(const float aperture2, const float shutterTime, const float ISO) {
     return log2(aperture2 / shutterTime * 100.0 / ISO);
@@ -128,7 +131,6 @@ float ComputeEV(float avgLuminance) {
 }
 #endif
 
-#ifdef _CLUT
 vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
 
     //Clamp to prevent weird results
@@ -158,8 +160,8 @@ vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
     lowp vec4 colorGradedResult = mix(newColor1, newColor2, fract(blueColor));
 
     return colorGradedResult;
+
 }
-#endif
 
 #ifdef _CVignette
 float vignette() {
@@ -275,8 +277,8 @@ void main() {
 		textureLod(tex, texCo + dir * 0.5, 0.0).rgb);
 	
 	float lumaB = dot(rgbB, luma);
-	if ((lumaB < lumaMin) || (lumaB > lumaMax)) fragColor.rgb = rgbA;
-	else fragColor.rgb = rgbB;
+	if ((lumaB < lumaMin) || (lumaB > lumaMax)) fragColor = vec4(rgbA, 1.0);
+	else fragColor = vec4(rgbB, 1.0);
 
 #else
 	
@@ -356,7 +358,7 @@ void main() {
 #endif
 
 #ifdef _CExposure
-	fragColor.rgb *= compoExposureStrength;
+	fragColor.rgb += fragColor.rgb * compoExposureStrength;
 #endif
 
 #ifdef _CPPM
@@ -364,36 +366,8 @@ void main() {
 #endif
 
 #ifdef _AutoExposure
-	//vec3 expo = textureLod(tex, vec2(0,0), 100).rgb;
-	//fragColor.rgb *= vec3(1.0) - min(expo, vec3(autoExposureStrength));
-	ComputeEV = textureLod(tex, vec2(0,0), 100).rgb;
-	fragColor.rgb *= ComputeEV;
-#endif
-#ifdef _Hist // Auto-exposure
-	if (texCoord.x < 0.1) fragColor.rgb = textureLod(histogram, vec2(0, 0), 9.0).rrr; // 512x512
-	// float minBrightness = 0.03f;
-	// float maxBrightness = 2.0f;
-	// float minAdaptation = 0.60f;
-	// float maxAdaptation = 0.9f;
-	// float minFractionSum = minAdaptation * sumValue;
-	// float maxFractionSum = maxAdaptation * sumValue;
-	// float sumWithoutOutliers = 0.0f;
-	// float sumWithoutOutliersRaw = 0.0f;
-	// for (int i = 0; i < numHistogramBuckets; ++i) {
-	// 	float localValue = luminanceHistogram[i];
-	// 	float vmin = min(localValue, minFractionSum);
-	// 	localValue -= vmin;
-	// 	localValue = localValue - vmin;
-	// 	minFractionSum -= vmin;
-	// 	maxFractionSum -= vmin;
-	// 	localValue = min(localValue, maxFractionSum);
-	// 	maxFractionSum -= localValue;
-	// 	float luminanceAtBucket = GetLuminanceAtBucket(i);
-	// 	sumWithoutOutliers += luminanceAtBucket * localValue;
-	// 	sumWithoutOutliersRaw += localValue;
-	// }
-	// float unclampedLuminance = sumWithoutOutliers / max(0.0001f, sumWithoutOutliersRaw);
-	// float clampedLuminace = clamp(unclampedLuminance, minBrightness, maxBrightness);
+	float expo = 2.0 - clamp(length(textureLod(histogram, vec2(0.5, 0.5), 0).rgb), 0.0, 1.0);
+	fragColor.rgb *= pow(expo, autoExposureStrength * 2.0);
 #endif
 
 #ifdef _CPPM
@@ -474,7 +448,7 @@ void main() {
 		fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2)); // To gamma
 	#endif
 #endif
-
+	
 #ifdef _CBW
 	// fragColor.rgb = vec3(clamp(dot(fragColor.rgb, fragColor.rgb), 0.0, 1.0));
 	fragColor.rgb = vec3((fragColor.r * 0.3 + fragColor.g * 0.59 + fragColor.b * 0.11) / 3.0) * 2.5;
