@@ -465,6 +465,7 @@ class ArmRPListItem(bpy.types.PropertyGroup):
     arm_fog_amountb: FloatProperty(name="Amount B", default=0.5, update=assets.invalidate_shader_cache)
     arm_tonemap: EnumProperty(
         items=[('Off', 'Off', 'Off'),
+               ('Custom', 'Custom', 'Custom'),
                ('Filmic', 'Filmic', 'Filmic'),
                ('Filmic2', 'Filmic2', 'Filmic2'),
                ('Reinhard', 'Reinhard', 'Reinhard'),

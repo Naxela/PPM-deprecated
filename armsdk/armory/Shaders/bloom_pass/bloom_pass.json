@@ -1,0 +1,19 @@
+{
+	"contexts": [
+		{
+			"name": "bloom_pass",
+			"depth_write": false,
+			"compare_mode": "always",
+			"cull_mode": "none",
+			"links": [
+				{
+					"name": "PPMComp2",
+					"link": "_PPMComp2"
+				}
+			],
+			"texture_params": [],
+			"vertex_shader": "../include/pass.vert.glsl",
+			"fragment_shader": "bloom_pass.frag.glsl"
+		}
+	]
+}

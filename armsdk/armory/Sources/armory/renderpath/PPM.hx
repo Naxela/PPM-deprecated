@@ -64,9 +64,30 @@ class PPM {
 		10.0,				//6: DoF Distance
 		160.0,				//7: DoF Focal Length mm
 		128,				//8: DoF F-Stop
-		0,					//9: Tonemapping Method
-							//x: Fisheye Distortion
-							//x: 
+		0					//9: Tonemapping Method
+
+	];
+
+	public static var tonemapper_uniforms = [
+		1.0, 				//0: Slope
+		1.0, 				//1: Toe
+		1.0, 				//2: Shoulder
+		1.0, 				//3: Black Clip
+		1.0 				//4: White Clip
+	];
+
+	public static var ssr_uniforms = [
+		0.04,				//0: Step
+		0.05,				//1: StepMin
+		5.0,				//2: Search
+		5.0,				//3: Falloff
+		0.6					//4: Jitter
+	];
+
+	public static var bloom_uniforms = [
+		1.0,				//0: Threshold
+		3.5,				//1: Strength
+		3.0					//2: Radius
 	];
 
 	//
@@ -244,18 +265,37 @@ class PPM {
 
 		if (link == "_PPMComp1") {
 			m = iron.object.Uniforms.helpMat;
-			m._00 = camera_uniforms[0];
-			m._01 = camera_uniforms[1];
-			m._02 = camera_uniforms[2];
-			m._03 = camera_uniforms[3];
+			m._00 = camera_uniforms[0]; //0.X
+			m._01 = camera_uniforms[1]; //0.Y
+			m._02 = camera_uniforms[2]; //0.Z
+			m._03 = camera_uniforms[3]; //0.W
 
-			m._10 = camera_uniforms[4];
-			m._11 = camera_uniforms[5];
-			m._12 = camera_uniforms[6];
-			m._13 = camera_uniforms[7];
+			m._10 = camera_uniforms[4]; //1.X
+			m._11 = camera_uniforms[5]; //1.Y
+			m._12 = camera_uniforms[6]; //1.Z
+			m._13 = camera_uniforms[7]; //1.W
 
-			m._20 = camera_uniforms[8];
-			m._21 = Std.int(camera_uniforms[9]);
+			m._20 = camera_uniforms[8]; //2.X
+			m._21 = Std.int(camera_uniforms[9]); //2.Y
+			m._22 = tonemapper_uniforms[0]; //2.Z
+			m._23 = tonemapper_uniforms[1]; //2.W
+
+			m._30 = tonemapper_uniforms[2]; //3.X
+			m._31 = tonemapper_uniforms[3]; //3.Y
+			m._32 = tonemapper_uniforms[4]; //3.Z
+		}
+
+		if (link == "_PPMComp2") {
+			m = iron.object.Uniforms.helpMat;
+			m._00 = ssr_uniforms[0]; //0.X
+			m._01 = ssr_uniforms[1]; //0.Y
+			m._02 = ssr_uniforms[2]; //0.Z
+			m._03 = ssr_uniforms[3]; //0.W
+
+			m._10 = ssr_uniforms[4]; //1.X
+			m._11 = bloom_uniforms[0]; //1.Y
+			m._12 = bloom_uniforms[1]; //1.Z
+			m._13 = bloom_uniforms[2];  //1.W
 		}
 
 		return m;
