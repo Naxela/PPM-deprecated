@@ -190,6 +190,16 @@
 					"name": "PPMComp1",
 					"link": "_PPMComp1",
 					"ifdef": ["_CPPM"]
+				},
+				{
+					"name": "PPMComp2",
+					"link": "_PPMComp2",
+					"ifdef": ["_CPPM"]
+				},
+				{
+					"name": "PPMComp3",
+					"link": "_PPMComp3",
+					"ifdef": ["_CPPM"]
 				}
 			],
 			"texture_params": [],
