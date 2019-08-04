@@ -19,14 +19,6 @@ class CameraGetNode(Node, ArmLogicTreeNode):
         self.outputs.new('NodeSocketFloat', 'DOF Distance')
         self.outputs.new('NodeSocketFloat', 'DOF Length')
         self.outputs.new('NodeSocketFloat', 'DOF F-Stop')
-
-        #self.inputs.new('NodeSocketFloat', 'Letterbox')
-        #self.inputs.new('NodeSocketFloat', 'Sharpen')
-        #self.inputs.new('NodeSocketFloat', 'Film Grain Strength')
-        #self.inputs.new('NodeSocketFloat', 'Vignette')
-        #self.inputs.new('NodeSocketFloat', 'Motion Blur Intensity')
-        #self.inputs.new('NodeSocketFloat', 'Bloom Threshold')
-        #self.inputs.new('NodeSocketFloat', 'Bloom Strength')
-        #self.inputs.new('NodeSocketFloat', 'Bloom Radius')
+        self.outputs.new('NodeSocketFloat', 'Film Grain')
 
 add_node(CameraGetNode, category='PPM')
