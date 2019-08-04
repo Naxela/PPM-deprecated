@@ -370,6 +370,7 @@ class RenderPathDeferred {
 		#if rp_chromatic_aberration
 		{
 			path.loadShader("shader_datas/chromatic_aberration_pass/chromatic_aberration_pass");
+			path.loadShader("shader_datas/copy_pass/copy_pass");
 		}
 		#end
 

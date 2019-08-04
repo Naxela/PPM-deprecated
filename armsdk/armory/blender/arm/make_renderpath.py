@@ -340,9 +340,9 @@ def build():
         assets.add_khafile_def('rp_ppm')
 
     if rpdat.rp_chromatic_aberration:
+        assets.add_shader_pass('copy_pass')
         assets.add_khafile_def('rp_chromatic_aberration')
         assets.add_shader_pass('chromatic_aberration_pass')
-        assets.add_shader_pass('copy_pass')
 
     gbuffer2 = '_Veloc' in wrd.world_defs
     if gbuffer2:
