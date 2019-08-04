@@ -64,7 +64,8 @@ class PPM {
 		10.0,				//6: DoF Distance
 		160.0,				//7: DoF Focal Length mm
 		128,				//8: DoF F-Stop
-		0					//9: Tonemapping Method
+		0,					//9: Tonemapping Method
+		2.0					//10: Film Grain
 
 	];
 
@@ -90,7 +91,24 @@ class PPM {
 		3.0					//2: Radius
 	];
 
-	//
+	public static var ssao_uniforms = [
+		1.0,
+		1.0,
+		8
+	];
+
+	public static var lenstexture_uniforms = [
+		0.1,				//0: Center Min Clip
+		0.5,				//1: Center Max Clip
+		0.1,				//2: Luminance Min
+		2.5,				//3: Luminance Max
+		2.0					//4: Brightness Exponent
+	];
+
+	public static var chromatic_aberration_uniforms = [
+		2.0,				//0: Strength
+		32					//1: Samples
+	];
 
     public static function externalVec3Link(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
         var v:Vec4 = null;
@@ -283,6 +301,7 @@ class PPM {
 			m._30 = tonemapper_uniforms[2]; //3.X
 			m._31 = tonemapper_uniforms[3]; //3.Y
 			m._32 = tonemapper_uniforms[4]; //3.Z
+			m._33 = camera_uniforms[10]; //3.W
 		}
 
 		if (link == "_PPMComp2") {
@@ -296,6 +315,22 @@ class PPM {
 			m._11 = bloom_uniforms[0]; //1.Y
 			m._12 = bloom_uniforms[1]; //1.Z
 			m._13 = bloom_uniforms[2];  //1.W
+
+			m._20 = ssao_uniforms[0]; //2.X
+			m._21 = ssao_uniforms[1]; //2.Y
+			m._22 = ssao_uniforms[2]; //2.Z
+		}
+
+		if (link == "_PPMComp3") {
+			m = iron.object.Uniforms.helpMat;
+			m._00 = lenstexture_uniforms[0]; //0.X
+			m._01 = lenstexture_uniforms[1]; //0.Y
+			m._02 = lenstexture_uniforms[2]; //0.Z
+			m._03 = lenstexture_uniforms[3]; //0.W
+
+			m._10 = lenstexture_uniforms[4]; //1.X
+			m._11 = chromatic_aberration_uniforms[0]; //1.Y
+			m._12 = chromatic_aberration_uniforms[1]; //1.Z
 		}
 
 		return m;

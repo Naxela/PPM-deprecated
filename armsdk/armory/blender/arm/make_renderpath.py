@@ -184,6 +184,8 @@ def build():
             if rpdat.arm_lens_texture != '':
                 wrd.compo_defs += '_CLensTex'
                 assets.add_embedded_data('lenstexture.jpg')
+                if rpdat.arm_lens_texture_masking:
+                    wrd.compo_defs += '_CLensTexMasking'
             if rpdat.arm_fisheye:
                 wrd.compo_defs += '_CFishEye'
             if rpdat.arm_vignette:
@@ -336,6 +338,11 @@ def build():
 
     if rpdat.rp_ppm:
         assets.add_khafile_def('rp_ppm')
+
+    if rpdat.rp_chromatic_aberration:
+        assets.add_khafile_def('rp_chromatic_aberration')
+        assets.add_shader_pass('chromatic_aberration_pass')
+        assets.add_shader_pass('copy_pass')
 
     gbuffer2 = '_Veloc' in wrd.world_defs
     if gbuffer2:
