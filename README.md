@@ -3,6 +3,19 @@
 ## Post-Processing Module
 Post-Processing Module (Formerly Post-Processing Volumes) is an addon for Armory3D that implements realtime colorgrading and implements both existing and new shaders as uniforms that can be fully controlled both through Haxe and through Logic Nodes.
 
+## Version 0.3 [Download: https://github.com/Naxela/PPM/archive/0.3.zip]:
+- Version 0.3 updates to PPM to support Armory version 2019.6 and adds support for more effects. An expanded selection of camera effects and lighting controls have been added, as well controls for Depth of Field and Film Grain. Additionally, controls have been added for the following effects:
+
+![](img/PPM03A.gif)
+
+This update also includes additional new screen-effects/filters, such as Chromatic Aberration (also known as Scene fringe) as well as and lens dirt/luminance masking. Finally, there's an additional option to select custom tonemapping controls.
+
+![](img/PPM03B.gif)
+
+Overall there's 14 new nodes:
+
+![](img/nodes3.png)
+
 ## Version 0.2 [Download: https://github.com/Naxela/PPM/archive/0.2.zip]:
 - Version 0.2 continues to improve the colorgrading and add more nodes. The colorgrading nodes have been organized in Get and Set nodes for easier data application and retrieval. The first auxiliary node have been added in the form of a lerp float node, that allows for easier timed transitions. Version is compatible with Armory 0.6
 
