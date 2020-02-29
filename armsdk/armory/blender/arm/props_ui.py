@@ -347,7 +347,7 @@ class ARM_PT_ArmoryProjectPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
         row = layout.row(align=True)
-        row.operator("arm.kode_studio")
+        row.operator("arm.open_editor")
         row.operator("arm.open_project_folder", icon="FILE_FOLDER")
 
 class ARM_PT_ProjectFlagsPanel(bpy.types.Panel):
@@ -419,7 +419,6 @@ class ARM_PT_ProjectModulesPanel(bpy.types.Panel):
         if wrd.arm_navigation != 'Disabled':
             layout.prop(wrd, 'arm_navigation_engine')
         layout.prop(wrd, 'arm_ui')
-        layout.prop(wrd, 'arm_formatlib')
         layout.prop_search(wrd, 'arm_khafile', bpy.data, 'texts', text='Khafile')
         layout.prop(wrd, 'arm_project_root')
 
@@ -434,72 +433,6 @@ class ArmVirtualInputPanel(bpy.types.Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-
-class ARM_PT_NavigationPanel(bpy.types.Panel):
-    bl_label = "Armory Navigation"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "scene"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = False
-        scene = bpy.context.scene
-        if scene == None:
-            return
-
-        layout.operator("arm.generate_navmesh")
-        layout.operator("arm.remove_navmesh")
-
-class ArmoryGenerateNavmeshButton(bpy.types.Operator):
-    '''Generate navmesh from selected meshes'''
-    bl_idname = 'arm.generate_navmesh'
-    bl_label = 'Generate Navmesh'
-
-    def execute(self, context):
-        obj = context.active_object
-        if obj == None or obj.type != 'MESH':
-            return{'CANCELLED'}
-
-        # Prevent duplicates
-        for t in obj.arm_traitlist:
-            if t.class_name_prop == 'NavMesh':
-                return{'FINISHED'}
-
-        # TODO: build tilecache here
-
-        # Navmesh trait
-        obj.arm_traitlist.add()
-        obj.arm_traitlist[-1].type_prop = 'Bundled Script'
-        obj.arm_traitlist[-1].class_name_prop = 'NavMesh'
-
-        # For visualization
-        # Removed in b28
-        # bpy.ops.mesh.navmesh_make('EXEC_DEFAULT')
-        # obj = context.active_object
-        # obj.hide_render = True
-        # obj.arm_export = False
-
-        return{'FINISHED'}
-
-class ArmoryRemoveNavmeshButton(bpy.types.Operator):
-    '''Remove generated navmesh from selected mesh'''
-    bl_idname = 'arm.remove_navmesh'
-    bl_label = 'Remove Navmesh'
-
-    def execute(self, context):
-        obj = context.active_object
-        if obj == None or obj.type != 'MESH':
-            return{'CANCELLED'}
-
-        # Navmesh trait
-        for i in range(len(obj.arm_traitlist)):
-            if obj.arm_traitlist[i].class_name_prop == 'NavMesh':
-                obj.arm_traitlist.remove(i)
-                break
-
-        return{'FINISHED'}
 
 class ArmoryPlayButton(bpy.types.Operator):
     '''Launch player in new window'''
@@ -623,12 +556,12 @@ class ArmoryOpenProjectFolderButton(bpy.types.Operator):
         if not arm.utils.check_saved(self):
             return {"CANCELLED"}
 
-        webbrowser.open('file://' + arm.utils.get_fp())
+        arm.utils.open_folder()
         return{'FINISHED'}
 
-class ArmoryKodeStudioButton(bpy.types.Operator):
-    '''Launch this project in Kode Studio or VS Code'''
-    bl_idname = 'arm.kode_studio'
+class ArmoryOpenEditorButton(bpy.types.Operator):
+    '''Launch this project in the IDE'''
+    bl_idname = 'arm.open_editor'
     bl_label = 'Code Editor'
     bl_description = 'Open Project in IDE'
 
@@ -639,10 +572,10 @@ class ArmoryKodeStudioButton(bpy.types.Operator):
         arm.utils.check_default_props()
 
         if not os.path.exists(arm.utils.get_fp() + "/khafile.js"):
-            print('Generating Krom project for Kode Studio')
+            print('Generating Krom project for IDE build configuration')
             make.build('krom')
 
-        arm.utils.kode_studio()
+        arm.utils.open_editor()
         return{'FINISHED'}
 
 class CleanMenu(bpy.types.Menu):
@@ -1222,7 +1155,6 @@ class ArmGenTerrainButton(bpy.types.Operator):
         links.new(nodes['Material Output'].inputs[2], node.outputs[0])
         node = nodes.new('ShaderNodeTexImage')
         node.location = (-600, 100)
-        node.color_space = 'NONE'
         node.interpolation = 'Closest'
         node.extension = 'EXTEND'
         node.arm_material_param = True
@@ -1505,14 +1437,11 @@ def register():
     bpy.utils.register_class(ArmoryStopButton)
     bpy.utils.register_class(ArmoryBuildProjectButton)
     bpy.utils.register_class(ArmoryOpenProjectFolderButton)
-    bpy.utils.register_class(ArmoryKodeStudioButton)
+    bpy.utils.register_class(ArmoryOpenEditorButton)
     bpy.utils.register_class(CleanMenu)
     bpy.utils.register_class(CleanButtonMenu)
     bpy.utils.register_class(ArmoryCleanProjectButton)
     bpy.utils.register_class(ArmoryPublishProjectButton)
-    bpy.utils.register_class(ArmoryGenerateNavmeshButton)
-    bpy.utils.register_class(ArmoryRemoveNavmeshButton)
-    bpy.utils.register_class(ARM_PT_NavigationPanel)
     bpy.utils.register_class(ArmGenLodButton)
     bpy.utils.register_class(ARM_PT_LodPanel)
     bpy.utils.register_class(ArmGenTerrainButton)
@@ -1558,14 +1487,11 @@ def unregister():
     bpy.utils.unregister_class(ArmoryStopButton)
     bpy.utils.unregister_class(ArmoryBuildProjectButton)
     bpy.utils.unregister_class(ArmoryOpenProjectFolderButton)
-    bpy.utils.unregister_class(ArmoryKodeStudioButton)
+    bpy.utils.unregister_class(ArmoryOpenEditorButton)
     bpy.utils.unregister_class(CleanMenu)
     bpy.utils.unregister_class(CleanButtonMenu)
     bpy.utils.unregister_class(ArmoryCleanProjectButton)
     bpy.utils.unregister_class(ArmoryPublishProjectButton)
-    bpy.utils.unregister_class(ArmoryGenerateNavmeshButton)
-    bpy.utils.unregister_class(ArmoryRemoveNavmeshButton)
-    bpy.utils.unregister_class(ARM_PT_NavigationPanel)
     bpy.utils.unregister_class(ArmGenLodButton)
     bpy.utils.unregister_class(ARM_PT_LodPanel)
     bpy.utils.unregister_class(ArmGenTerrainButton)

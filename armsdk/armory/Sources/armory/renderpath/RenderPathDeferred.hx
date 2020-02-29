@@ -6,12 +6,24 @@ class RenderPathDeferred {
 
 	#if (rp_renderer == "Deferred")
 
-	static var path:RenderPath;
+	static var path: RenderPath;
 
 	#if rp_voxelao
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
 	#end
+
+	public static function setTargetMeshes() {
+		#if rp_gbuffer2
+		{
+			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		}
+		#else
+		{
+			path.setTarget("gbuffer0", ["gbuffer1"]);
+		}
+		#end
+	}
 
 	public static function drawMeshes() {
 		path.drawMeshes("mesh");
@@ -21,7 +33,7 @@ class RenderPathDeferred {
 		Inc.applyConfig();
 	}
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 
 		path = _path;
 
@@ -249,7 +261,7 @@ class RenderPathDeferred {
 			t.name = "bloomtex";
 			t.width = 0;
 			t.height = 0;
-			t.scale = 1.0;
+			t.scale = 0.25;
 			t.format = Inc.getHdrFormat();
 			path.createRenderTarget(t);
 		}
@@ -259,7 +271,7 @@ class RenderPathDeferred {
 			t.name = "bloomtex2";
 			t.width = 0;
 			t.height = 0;
-			t.scale = 1.0;
+			t.scale = 0.25;
 			t.format = Inc.getHdrFormat();
 			path.createRenderTarget(t);
 		}
@@ -314,7 +326,7 @@ class RenderPathDeferred {
 			path.loadShader("shader_datas/ssr_pass/ssr_pass");
 			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
 			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
-			
+
 			#if rp_ssr_half
 			{
 				var t = new RenderTargetRaw();
@@ -358,7 +370,7 @@ class RenderPathDeferred {
 			t.name = "empty_white";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'R8';
+			t.format = "R8";
 			var rt = new RenderTarget(t);
 			var b = haxe.io.Bytes.alloc(1);
 			b.set(0, 255);
@@ -379,14 +391,6 @@ class RenderPathDeferred {
 	@:access(iron.RenderPath)
 	public static function commands() {
 
-		#if rp_dynres
-		{
-			if (armory.data.Config.raw.rp_dynres != false) {
-				DynamicResolutionScale.run(path);
-			}
-		}
-		#end
-
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		#if (rp_background == "Clear")
 		{
@@ -402,11 +406,16 @@ class RenderPathDeferred {
 		{
 			path.setTarget("gbuffer2");
 			path.clearTarget(0xff000000);
-			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		}
-		#else
+		#end
+
+		RenderPathCreator.setTargetMeshes();
+
+		#if rp_dynres
 		{
-			path.setTarget("gbuffer0", ["gbuffer1"]);
+			if (armory.data.Config.raw.rp_dynres != false) {
+				DynamicResolutionScale.run(path);
+			}
 		}
 		#end
 
@@ -430,7 +439,7 @@ class RenderPathDeferred {
 			path.setTarget("gbuffer0", ["gbuffer1"]);
 			path.bindTarget("_main", "gbufferD");
 			path.drawDecals("decal");
-			
+
 			#if (!kha_opengl)
 			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
 			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
@@ -466,7 +475,7 @@ class RenderPathDeferred {
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
 			}
-		}	
+		}
 		#elseif (rp_ssgi == "SSAO")
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
@@ -562,7 +571,7 @@ class RenderPathDeferred {
 			Inc.bindShadowMap();
 		}
 		#end
-		
+
 		#if rp_material_solid
 		path.drawShader("shader_datas/deferred_light_solid/deferred_light");
 		#elseif rp_material_mobile
@@ -637,6 +646,7 @@ class RenderPathDeferred {
 
 		#if rp_blending
 		{
+			path.setTarget("tex"); // Re-binds depth
 			path.drawMeshes("blend");
 		}
 		#end
@@ -756,7 +766,7 @@ class RenderPathDeferred {
 				{
 					path.bindTarget("_main", "gbufferD");
 					path.drawShader("shader_datas/motion_blur_pass/motion_blur_pass");
-					
+
 					#if (!kha_opengl)
 					path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 					#end
@@ -777,7 +787,7 @@ class RenderPathDeferred {
 		#if rp_chromatic_aberration
 		{
 			path.setTarget("buf");
-			path.bindTarget("tex","tex");
+			path.bindTarget("tex", "tex");
 			path.drawShader("shader_datas/chromatic_aberration_pass/chromatic_aberration_pass");
 			path.setTarget("tex");
 			path.bindTarget("buf", "tex");
@@ -811,7 +821,7 @@ class RenderPathDeferred {
 		#end
 
 		RenderPathCreator.finalTarget = path.currentTarget;
-		
+
 		var target = "";
 		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
 		{
@@ -823,7 +833,7 @@ class RenderPathDeferred {
 		}
 		#end
 		path.setTarget(target);
-		
+
 		path.bindTarget("tex", "tex");
 		#if rp_compositordepth
 		{

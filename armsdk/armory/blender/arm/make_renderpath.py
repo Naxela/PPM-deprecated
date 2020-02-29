@@ -166,21 +166,13 @@ def build():
                 wrd.compo_defs += '_CFog'
                 compo_depth = True
 
-            focus_distance = 0.0 # TODO: deprecated
-            if len(bpy.data.cameras) > 0:
-                cam = bpy.data.cameras[0]
-                if hasattr(cam, 'dof'):
-                    if cam.dof.use_dof:
-                        focus_distance = cam.dof.focus_distance
-                else:
-                    focus_distance = cam.dof_distance
+            focus_distance = 0.0
+            if len(bpy.data.cameras) > 0 and bpy.data.cameras[0].dof.use_dof:
+                focus_distance = bpy.data.cameras[0].dof.focus_distance
 
-            if len(bpy.data.cameras) > 0 and focus_distance > 0.0:
+            if focus_distance > 0.0:
                 wrd.compo_defs += '_CDOF'
                 compo_depth = True
-            if compo_depth:
-                wrd.compo_defs += '_CDepth'
-                assets.add_khafile_def('rp_compositordepth')
             if rpdat.arm_lens_texture != '':
                 wrd.compo_defs += '_CLensTex'
                 assets.add_embedded_data('lenstexture.jpg')
@@ -192,6 +184,7 @@ def build():
                 wrd.compo_defs += '_CVignette'
             if rpdat.arm_lensflare:
                 wrd.compo_defs += '_CGlare'
+                compo_depth = True
             if rpdat.arm_lut_texture != '':
                 wrd.compo_defs += '_CLUT'
                 assets.add_embedded_data('luttexture.jpg')
@@ -199,9 +192,12 @@ def build():
                 wrd.compo_defs += '_CTexStep'
             if '_CDOF' in wrd.compo_defs or '_CFog' in wrd.compo_defs or '_CGlare' in wrd.compo_defs:
                 wrd.compo_defs += '_CCameraProj'
+            if compo_depth:
+                wrd.compo_defs += '_CDepth'
+                assets.add_khafile_def('rp_compositordepth')
             if rpdat.rp_ppm:
                 wrd.compo_defs += '_CPPM'
-        
+
             assets.add_shader_pass('compositor_pass')
 
         assets.add_khafile_def('rp_antialiasing={0}'.format(rpdat.rp_antialiasing))

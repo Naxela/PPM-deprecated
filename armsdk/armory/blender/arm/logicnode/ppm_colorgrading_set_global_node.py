@@ -41,7 +41,7 @@ class ColorgradingSetGlobalNode(Node, ArmLogicTreeNode):
 
     def draw_nodes_uniform(self, context):
         self.inputs.new('NodeSocketFloat', 'Whitebalance')
-        self.inputs[-1].default_value = 6500.0
+        self.inputs[-1].default_value = 7500.0
         self.inputs.new('NodeSocketColor', 'Tint')
         self.inputs[-1].default_value = [1.0, 1.0, 1.0, 1.0]
         self.inputs.new('NodeSocketFloat', 'Saturation')
