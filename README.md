@@ -1,5 +1,8 @@
 ![](img/wip_notice.jpg)
 
+# NOTE DEPRECATED!
+This addon has now been implemented into Armory. You can find the nodes under the "Postprocess category". Enable it under the Renderpath by toggling "Realtime Postprocess".
+
 ## Post-Processing Module
 Post-Processing Module (Formerly Post-Processing Volumes) is an addon for Armory3D that implements realtime colorgrading and implements both existing and new shaders as uniforms that can be fully controlled both through Haxe and through Logic Nodes.
 
